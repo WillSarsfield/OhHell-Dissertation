@@ -22,5 +22,7 @@ class Card:
             13: "K",
             14: "A"
         }
-        return f"{self.value} {suitDict[self.suit]}"
+        if self.value in valueDict:
+            return f"|{valueDict[self.value]} {suitDict[self.suit]}|"
+        return f"|{self.value} {suitDict[self.suit]}|"
     

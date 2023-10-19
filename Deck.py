@@ -1,4 +1,5 @@
-import Card
+from Card import Card
+import random
 
 class Deck:
     def __init__(self) -> None:
@@ -8,7 +9,8 @@ class Deck:
         
         for suit in suits:
             for value in values:
-                self.cardList.append(c = Card(value,suit))
+                c = Card(value,suit)
+                self.cardList.append(c)
 
     def __str__(self):
         deckStr = []
@@ -16,3 +18,12 @@ class Deck:
             deckStr.append(print(card))
 
         return deckStr
+    
+    def getCards(self):
+        return self.cardList
+    
+    def shuffle(self):
+        random.shuffle(self.cardList)
+
+    def pop(self):
+        return self.cardList.pop(0)
