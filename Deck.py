@@ -5,7 +5,7 @@ class Deck:
     def __init__(self) -> None:
         self.cardList = []
         values = list(range(2,15))
-        suits = ["Hearts", "Diamonds", "Spades", "Clubs"]
+        suits = list(range(0,4))
         
         for suit in suits:
             for value in values:
@@ -13,11 +13,13 @@ class Deck:
                 self.cardList.append(c)
 
     def __str__(self):
-        deckStr = []
+        string = ""
         for card in self.cardList:
-            deckStr.append(print(card))
+            string += card.__str__()
+            string += "  "
+        return string
+        
 
-        return deckStr
     
     def getCards(self):
         return self.cardList
@@ -25,5 +27,7 @@ class Deck:
     def shuffle(self):
         random.shuffle(self.cardList)
 
-    def pop(self):
-        return self.cardList.pop(0)
+    def makeHand(self):
+        cards = self.cardList[:13]
+        del self.cardList[:13]
+        return cards

@@ -1,4 +1,6 @@
 from Deck import Deck
+from Hand import Hand
+from Player import Player
 
 deck = Deck()
 
@@ -6,15 +8,21 @@ deck.shuffle()
 
 print("Deck:")
 
-for card in deck.getCards():
-    print(card)
+
+print(deck)
 
 print("Hand:")
 
-for i in range(0,7):
-    print(deck.pop())
+playerList = []
+for i in range(0,4): 
+    hand = Hand(deck.makeHand())
+    player = Player(str(i+1))
+    player.makeHand(hand)
+    playerList.append(player)
 
-print("Deck")
+for player in playerList:
+    print(player)
 
-for card in deck.getCards():
-    print(card)
+print("Deck:")
+
+print(deck)

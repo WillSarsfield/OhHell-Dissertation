@@ -11,10 +11,10 @@ class Card:
     
     def __str__(self):
         suitDict = {
-            "Hearts": "♥",
-            "Diamonds": "♦",
-            "Spades": "♠",
-            "Clubs": "♣"
+            0: "♥",
+            1: "♦",
+            2: "♠",
+            3: "♣"
         }
         valueDict = {
             11: "J",
