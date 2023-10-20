@@ -22,7 +22,6 @@ for i in range(0,4):
 
 for player in playerList:
     print(player)
+    print(player.getHand().sort())
+    print(hand)
 
-print("Deck:")
-
-print(deck)

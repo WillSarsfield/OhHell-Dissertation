@@ -5,7 +5,7 @@ class Hand:
         self.cardList = cardList
     
     def sort(self):
-        sorted(self.cardlist)
+        sorted(self.cardList, key=lambda card: card.value)
 
     def shuffle(self):
         random.shuffle(self.cardList)
