@@ -14,6 +14,12 @@ class Player:
     def makeHand(self, hand):
         self.hand = hand
 
+    def sortHand(self):
+        self.hand.sort()
+    
+    def shuffleHand(self):
+        self.hand.shuffle()
+
     def getScore(self):
         return self.score
     
