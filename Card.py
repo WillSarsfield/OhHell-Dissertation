@@ -9,7 +9,7 @@ class Card:
     def getValue(self):
         return self.value
     
-    def __str__(self):
+    def __str__(self):#print card translates ints used for suits and values to correct symbols
         suitDict = {
             0: "♥",
             1: "♦",

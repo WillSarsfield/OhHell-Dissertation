@@ -2,7 +2,7 @@ from Card import Card
 import random
 
 class Deck:
-    def __init__(self) -> None:
+    def __init__(self) -> None:#builds deck of cards when initialised
         self.cardList = []
         values = list(range(2,15))
         suits = list(range(0,4))

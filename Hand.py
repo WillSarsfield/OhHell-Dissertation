@@ -26,6 +26,9 @@ class Hand:
     def pop(self):
         return self.cardList.pop(0)
     
+    def remove(self, card):
+        self.cardList.remove(card)
+    
     def __str__(self):
         string = ""
         for card in self.cardList:
