@@ -1,14 +1,16 @@
 from Player import Player
-from Round import Round
+import Round
+
+#Game class that when called plays the number of rounds specified
 
 class Game:
-    def __init__(self) -> None:
-        playerList = []
+    def __init__(self, rounds) -> None:
+        self.playerList = []
         for i in range(0,4):
             player = Player("player " + str(i+1))
-            playerList.append(player)
-        for i in range(0,4):
-            round = Round(i, i, playerList)
-        for player in playerList:
-            print(player)
-            print(player.getScore())
+            self.playerList.append(player)
+        for i in range(0, rounds):
+            Round.round(i % 4, i % 4, self.playerList)
+    
+    def getPlayers(self):#return player scores for statistics overview
+        return self.playerList

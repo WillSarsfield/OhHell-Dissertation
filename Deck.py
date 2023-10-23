@@ -24,10 +24,10 @@ class Deck:
     def getCards(self):
         return self.cardList
     
-    def shuffle(self):
+    def shuffle(self):#shuffle deck function
         random.shuffle(self.cardList)
 
-    def makeHand(self):
+    def makeHand(self):#deals hand of 13 cards from the top of the deck
         cards = self.cardList[:13]
         del self.cardList[:13]
         return cards

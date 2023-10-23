@@ -2,7 +2,7 @@ import random
 import math
 from Card import Card
 
-class Hand:
+class Hand:#class that stores a players hand
     def __init__(self, cardList) -> None:
         self.cardList = cardList
     
@@ -17,7 +17,7 @@ class Hand:
             newList.append(card)
         self.cardList = newList
 
-    def shuffle(self):
+    def shuffle(self):#players can shuffle hand if they wish
         random.shuffle(self.cardList)
 
     def getCards(self):

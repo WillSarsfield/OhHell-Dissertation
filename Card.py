@@ -1,4 +1,4 @@
-class Card:
+class Card:#basic class defining individual cards through integers
     def __init__(self, value, suit) -> None:
         self.value = value
         self.suit = suit
@@ -9,7 +9,7 @@ class Card:
     def getValue(self):
         return self.value
     
-    def __str__(self):#print card translates ints used for suits and values to correct symbols
+    def __str__(self):#print card translates integers used for suits and values to correct symbols
         suitDict = {
             0: "♥",
             1: "♦",
