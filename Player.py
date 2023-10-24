@@ -1,4 +1,4 @@
-import RandomAI
+import random
 
 class Player:
     def __init__(self, name) -> None:
@@ -54,12 +54,16 @@ class Player:
         return options
     
     def playRandomOption(self, options): #picks a random card out of the options, removes it from hand, and returns it
-        card = RandomAI.chooseCard(options)
+        rnd = random.randrange(0, len(options))
+        card = options[rnd]
         self.hand.remove(card)
         return card
     
     def playRandomBid(self, ban): #picks a random number from 0 to 13
-        self.bid = RandomAI.chooseBid(ban)
+        rnd = ban
+        while rnd == ban:
+            rnd = random.randrange(0, 13)
+        self.bid = rnd
 
     def __str__(self):
         string = self.name + ": "
