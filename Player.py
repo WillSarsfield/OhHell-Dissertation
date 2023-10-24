@@ -4,9 +4,9 @@ class Player:
     def __init__(self, name) -> None:
         self.name = name
         self.hand = []
-        self.score = 0
-        self.roundScore = 0
-        self.bid = 0
+        self.score = 0 #cumulative score
+        self.roundScore = 0 #score over a single round
+        self.bid = 0 #bid for current round
     
     def getName(self):
         return self.name
@@ -43,22 +43,22 @@ class Player:
         self.bid = bid
 
     def getOptions(self, lead = -1):#get card list of options to play given the lead suit
-        if lead == -1:
+        if lead == -1: #if nothing passed into function, no suit has been played so any card is an option
             return self.hand.getCards()
         options = []
-        for card in self.hand.getCards():
+        for card in self.hand.getCards(): #add cards of the same suit as the lead to the options
             if card.getSuit() == lead:
                 options.append(card)
-        if not options:
+        if not options: #if no cards with the same suit as the lead, all cards are options
             options = self.hand.getCards()
         return options
     
-    def playRandomOption(self, options):
+    def playRandomOption(self, options): #picks a random card out of the options, removes it from hand, and returns it
         card = RandomAI.chooseCard(options)
         self.hand.remove(card)
         return card
     
-    def playRandomBid(self, ban):
+    def playRandomBid(self, ban): #picks a random number from 0 to 13
         self.bid = RandomAI.chooseBid(ban)
 
     def __str__(self):
