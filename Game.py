@@ -43,14 +43,14 @@ class Game:
         bidTotal = 0
         for i in range(0, len(playerList)):
             if i != len(playerList) - 1:
-                playerList[i].playRandomBid(handSize + 1) #can make random bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
+                playerList[i].playRandomBid(handSize + 1, handSize) #can make random bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
                 bidTotal += playerList[i].getBid()
                 print("player " + str(i+1) + " bid: " + str(playerList[i].getBid()))
             else:
                 if bidTotal < 14: #calculates the bid that is banned for the final player
-                    playerList[i].playRandomBid(handSize - bidTotal)
+                    playerList[i].playRandomBid(handSize - bidTotal, handSize)
                 else:
-                    playerList[i].playRandomBid(handSize + 1)
+                    playerList[i].playRandomBid(handSize + 1, handSize)
                 print("player " + str(i+1) + " bid: " + str(playerList[i].getBid()))
 
         for i in range(0, handSize):

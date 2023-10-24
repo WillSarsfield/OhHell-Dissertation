@@ -1,6 +1,6 @@
 from Game import Game
 import time
-rounds = 13
+rounds = 5
 players = 5
 startTime = time.time()
 game = Game(rounds, players)

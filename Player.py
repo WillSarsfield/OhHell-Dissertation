@@ -59,10 +59,10 @@ class Player:
         self.hand.remove(card)
         return card
     
-    def playRandomBid(self, ban): #picks a random number from 0 to 13
+    def playRandomBid(self, ban, handSize): #picks a random number from 0 to 13
         rnd = ban
         while rnd == ban:
-            rnd = random.randrange(0, 13)
+            rnd = random.randrange(0, handSize)
         self.bid = rnd
 
     def __str__(self):
