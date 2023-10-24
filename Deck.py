@@ -1,5 +1,6 @@
 from Card import Card
 import random
+import math
 
 class Deck:
     def __init__(self) -> None:#builds deck of cards when initialised
@@ -27,7 +28,7 @@ class Deck:
     def shuffle(self):#shuffle deck function
         random.shuffle(self.cardList)
 
-    def makeHand(self):#deals hand of 13 cards from the top of the deck
-        cards = self.cardList[:13]
-        del self.cardList[:13]
+    def makeHand(self, i):#deals hand of i cards from the top of the deck
+        cards = self.cardList[:i]
+        del self.cardList[:i]
         return cards
