@@ -23,6 +23,6 @@ class Card:#basic class defining individual cards through integers
             14: "A"
         }
         if self.value in valueDict:
-            return f"|{valueDict[self.value]} {suitDict[self.suit]}|"
-        return f"|{self.value} {suitDict[self.suit]}|"
+            return f"|{valueDict[self.value]:<2} {suitDict[self.suit]}|"
+        return f"|{self.value:<2} {suitDict[self.suit]}|"
     

@@ -1,7 +1,7 @@
 from Game import Game
 import time
-rounds = 5
-players = 5
+rounds = 13
+players = 4
 startTime = time.time()
 game = Game(rounds, players)
 print("---%s seconds---" % (time.time() - startTime))
