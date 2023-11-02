@@ -49,10 +49,15 @@ class MainApplication(tk.Tk):
         self.title("Declaration Whist")
         self.geometry("960x540")
         self.resizable(False,False)
-        self.bind("<F11>", lambda event: self.attributes("-fullscreen", True))
-        self.bind("<Escape>", lambda event: self.attributes("-fullscreen", False))
+        # self.bind("<F11>", lambda event: self.attributes("-fullscreen", True))
+        # self.bind("<Escape>", lambda event: self.attributes("-fullscreen", False))
         self.current_frame = None
         self.switch_frame(MenuScreen)
+        self.background_image = Image.open("Assets/grass.png")
+        self.background_imagetk = ImageTk.PhotoImage(self.background_image)
+        self.background = ttk.Label(self, image = self.background_imagetk)
+        self.background.grid(row = 0, column = 0)
+
 
     def switch_frame(self, frame_class):
         new_frame = frame_class(self)
