@@ -4,10 +4,9 @@ from PIL import Image, ImageTk
 from Game import Game
 import math
 import time
-import random
 
 class PlayerWindow(tk.Tk):
-    def __init__(self, player, cardsPlayed):
+    def __init__(self, player, cardsPlayed, winningCards):
         super().__init__()
         self.player = player
         self.cardsPlayed = cardsPlayed
@@ -16,20 +15,23 @@ class PlayerWindow(tk.Tk):
         self.resizable(False,False)
         self.bind("<Escape>", lambda event: self.destroy())
         self.bind('<Return>', self.on_key_press)
-        self.background_image = tk.PhotoImage(file="Assets/grass.png")
+        self.frame = 0
 
+        self.background_image = tk.PhotoImage(file="Assets/grass.png")
         self.background_label = tk.Label(self, image=self.background_image)
         self.background_label.place(x=0, y=0, relwidth=1, relheight=1)
 
         self.player_label = tk.Label(self, text = self.player.getName(), font = ("Terminal", 24))
         self.player_label.grid(row=0,column=0)
+        self.score_label = tk.Label(self, text = f"Score: {self.player.getScoreHistory()[self.frame]}", font = ("Terminal", 16))
+        self.score_label.grid(row=0, column=1)
 
         self.hand = tk.Frame(self, bd=2, relief=tk.SUNKEN)
         self.hand.place(x=120, y=500, relwidth=0.645, relheight=0.3)
 
         self.playZone = tk.Frame(self, bd=2, relief=tk.SUNKEN)
         self.playZone.place(x=192, y=162, relwidth=0.4, relheight=0.4)
-        self.frame = 0
+
 
         suitDict = {
             0: "hearts",
@@ -45,7 +47,7 @@ class PlayerWindow(tk.Tk):
             self.card_imagetk = ImageTk.PhotoImage(self.card_image)
             self.card_images.append(self.card_imagetk)
         i=0
-        for card in self.player.getHistory()[self.frame]:
+        for card in self.player.getHandHistory()[self.frame]:
             self.show_card(self.hand, card.getValue(), card.getSuit(), i,self.card_images)
             i+=1
 
@@ -54,6 +56,8 @@ class PlayerWindow(tk.Tk):
         card = ttk.Label(frame, image = card_images[x])
         if i > 7:
             card.grid(row = 1, column = i - 8)
+        elif i > 99:
+            card.grid(row = 1, column = 2)
         else: 
             card.grid(row = 0, column = i)
 
@@ -67,12 +71,11 @@ class PlayerWindow(tk.Tk):
     def on_key_press(self, event):
         self.frame += 1
         print(f"frame: {self.frame}")
-        print(self.player.getHistory()[self.frame])
         self.hand.destroy()
         self.hand = tk.Frame(self, bd=2, relief=tk.SUNKEN)
         self.hand.place(x=120, y=500, relwidth=0.645, relheight=0.3)
         i = 0
-        for card in self.player.getHistory()[self.frame]:
+        for card in self.player.getHandHistory()[self.frame]:
             self.show_card(self.hand, card.getValue(), card.getSuit(), i,self.card_images)
             i+=1
         self.playZone.destroy()
@@ -80,9 +83,12 @@ class PlayerWindow(tk.Tk):
         self.playZone.place(x=192, y=162, relwidth=0.4, relheight=0.4)
         j = 0
         for card in self.cardsPlayed[self.frame]:
-            print(card)
             self.show_card(self.playZone, card.getValue(), card.getSuit(), j, self.card_images)
             j+=1
+        j = 100
+        self.show_card(self.playZone,  winningCards[self.frame].getValue(), winningCards[self.frame].getSuit(), j, self.card_images)
+        self.score_label = tk.Label(self, text = f"Score: {self.player.getScoreHistory()[self.frame]}", font = ("Terminal", 16))
+        self.score_label.grid(row=0, column=1, sticky = "e")
 
 if __name__ == "__main__":
     rounds = 13
@@ -91,8 +97,8 @@ if __name__ == "__main__":
     game = Game(rounds, players)
     player = game.getPlayers()[0]
     cardsPlayed = game.getCardsPlayed()
-    print(cardsPlayed)
+    winningCards = game.getWinningCards()
     print("---%s seconds---" % (time.time() - startTime))
     print("Rounds played: " + str(rounds))
-    window = PlayerWindow(player, cardsPlayed)
+    window = PlayerWindow(player, cardsPlayed, winningCards)
     window.mainloop()

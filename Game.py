@@ -12,6 +12,7 @@ class Game:
         self.playerList = []
         self.handSize = math.floor(52/players)
         self.displayCards = []
+        self.winningCards = []
         for i in range(0, self.players):
             player = Player("player " + str(i+1))#make players with names
             self.playerList.append(player)#add to list of players
@@ -23,6 +24,9 @@ class Game:
     
     def getCardsPlayed(self):
         return self.displayCards
+    
+    def getWinningCards(self):
+        return self.winningCards
 
     def round(self, trump, first, handSize):
         suitDict = { #translate suit value to symbol
@@ -57,12 +61,15 @@ class Game:
                     self.playerList[i].playRandomBid(handSize + 1, handSize)
                 print("player " + str(i+1) + " bid: " + str(self.playerList[i].getBid()))
         self.displayCards.append([])
+        self.winningCards.append(None)
+        for player in self.playerList:
+                player.addScoreHistory(player.getScore())
         for i in range(0, handSize):
-            for player in self.playerList:
+            for player in self.playerList:#save hand in history for display later
                 saveCards = []
                 for card in player.getHand().getCards():
                     saveCards.append(card)
-                player.addHistory(saveCards)
+                player.addHandHistory(saveCards)
             cardList = [] #cardlist the trick will be passed into
             print("first = " + str(first + 1))
             options = self.playerList[first].getOptions() #lead player collects all the possible plays it can make
@@ -76,15 +83,18 @@ class Game:
                 card = self.playerList[i % len(self.playerList)].playRandomOption(options) #player chooses a play from its options
                 print(card)
                 cardList.append(card) #card played added to list
-            self.displayCards.append(cardList)
+            self.displayCards.append(cardList) #save cards in the trick to be displayed
             first = self.trick(trump, first, cardList, len(self.playerList)) #trick winner decided, index of the player who won is returned
             self.playerList[first].addRoundScore(1) #update winning player's score
+            for player in self.playerList:
+                player.addScoreHistory(player.getScore() + player.getRoundScore())
         for player in self.playerList: #awards bonus points to any player who matched their bid at the end of the round
-            player.addHistory([])
+            player.addHandHistory([])
             if player.getRoundScore() == player.getBid():
                 player.addScore(10 + player.getRoundScore())
             else:
                 player.addScore(player.getRoundScore())
+            player.addScoreHistory(player.getScore())
 
     def trick(self, trump, first, cardList, players):
         winner = first #winner is set as the first player to start
@@ -112,6 +122,7 @@ class Game:
                         winnerVal = card.getValue()
             i += 1
         winnerCard = Card(winnerVal, winnerSuit)
+        self.winningCards.append(winnerCard)
         print("Card that won:")
         print(winnerCard)
         return winner #return the index of the player that won
