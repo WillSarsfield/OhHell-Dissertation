@@ -7,6 +7,7 @@ class Player:
         self.score = 0 #cumulative score
         self.roundScore = 0 #score over a single round
         self.bid = 0 #bid for current round
+        self.playerHistory = []
     
     def getName(self):
         return self.name
@@ -41,6 +42,12 @@ class Player:
     
     def makeBid(self, bid):
         self.bid = bid
+
+    def addHistory(self, cards):
+        self.playerHistory.append(cards)
+    
+    def getHistory(self):
+        return self.playerHistory
 
     def getOptions(self, lead = -1):#get card list of options to play given the lead suit
         if lead == -1: #if nothing passed into function, no suit has been played so any card is an option

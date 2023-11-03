@@ -1,12 +1,19 @@
-from Game import Game
-import time
-import numpy as np
-rounds = 13
-players = 4
-startTime = time.time()
-game = Game(rounds, players)
-print("---%s seconds---" % (time.time() - startTime))
-print("Rounds played: " + str(rounds))
-for player in game.getPlayers():
-    print(player)
-    print(player.getScore())
+import tkinter as tk
+import tkinter.font as tkFont
+
+root = tk.Tk()
+
+# Create a dummy label just to create a default root window
+dummy_label = tk.Label(root, text="Dummy Label")
+dummy_label.pack()
+
+# Get a list of available fonts
+all_fonts = tkFont.families()
+
+# Print the list of fonts
+for font in all_fonts:
+    print(font)
+    dummy_label = tk.Label(root, text="Dummy Label", font=("Terminal", 20))
+    dummy_label.pack()
+
+root.mainloop()
