@@ -13,6 +13,8 @@ class Game:
         self.handSize = math.floor(52/players)
         self.displayCards = []
         self.winningCards = []
+        self.currentLead = []
+        self.currentBids = []
         for i in range(0, self.players):
             player = Player("player " + str(i+1))#make players with names
             self.playerList.append(player)#add to list of players
@@ -27,6 +29,12 @@ class Game:
     
     def getWinningCards(self):
         return self.winningCards
+    
+    def getCurrentLead(self):
+        return self.currentLead
+    
+    def getCurrentBids(self):
+        return self.currentBids
 
     def round(self, trump, first, handSize):
         suitDict = { #translate suit value to symbol
@@ -49,19 +57,25 @@ class Game:
         ###
         #bidding phase
         bidTotal = 0
-        for i in range(0, len(self.playerList)):
-            if i != len(self.playerList) - 1:
-                self.playerList[i].playRandomBid(handSize + 1, handSize) #can make random bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
-                bidTotal += self.playerList[i].getBid()
-                print("player " + str(i+1) + " bid: " + str(self.playerList[i].getBid()))
+        bids = []
+        for i in range(first , first + len(self.playerList)):
+            if (i % len(self.playerList)) != len(self.playerList) - 1:
+                self.playerList[i % len(self.playerList)].playRandomBid(handSize + 1, handSize) #can make random bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
+                bidTotal += self.playerList[i % len(self.playerList)].getBid()
+                print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
+                bids.append(self.playerList[i % len(self.playerList)].getBid())
             else:
                 if bidTotal < 14: #calculates the bid that is banned for the final player
-                    self.playerList[i].playRandomBid(handSize - bidTotal, handSize)
+                    self.playerList[i % len(self.playerList)].playRandomBid(handSize - bidTotal, handSize)
                 else:
-                    self.playerList[i].playRandomBid(handSize + 1, handSize)
-                print("player " + str(i+1) + " bid: " + str(self.playerList[i].getBid()))
+                    self.playerList[i % len(self.playerList)].playRandomBid(handSize + 1, handSize)
+                print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
+                bids.append(self.playerList[i % len(self.playerList)].getBid())
+
         self.displayCards.append([])
         self.winningCards.append(None)
+        self.currentLead.append(0)
+        self.currentBids.append(bids)
         for player in self.playerList:
                 player.addScoreHistory(player.getScore())
         for i in range(0, handSize):
@@ -72,6 +86,7 @@ class Game:
                 player.addHandHistory(saveCards)
             cardList = [] #cardlist the trick will be passed into
             print("first = " + str(first + 1))
+            self.currentLead.append(first)
             options = self.playerList[first].getOptions() #lead player collects all the possible plays it can make
             print("player " + str(first + 1) + "'s turn:")
             leadCard = self.playerList[first].playRandomOption(options) #lead player chooses a play from its options
@@ -85,6 +100,7 @@ class Game:
                 cardList.append(card) #card played added to list
             self.displayCards.append(cardList) #save cards in the trick to be displayed
             first = self.trick(trump, first, cardList, len(self.playerList)) #trick winner decided, index of the player who won is returned
+            self.currentLead.append(first)
             self.playerList[first].addRoundScore(1) #update winning player's score
             for player in self.playerList:
                 player.addScoreHistory(player.getScore() + player.getRoundScore())
