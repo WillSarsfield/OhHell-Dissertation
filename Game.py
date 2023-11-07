@@ -15,6 +15,7 @@ class Game:
         self.winningCards = []
         self.currentLead = []
         self.currentBids = []
+        self.trumps = []
         for i in range(0, self.players):
             player = Player("player " + str(i+1))#make players with names
             self.playerList.append(player)#add to list of players
@@ -35,6 +36,9 @@ class Game:
     
     def getCurrentBids(self):
         return self.currentBids
+    
+    def getTrumps(self):
+        return self.trumps
 
     def round(self, trump, first, handSize):
         suitDict = { #translate suit value to symbol
@@ -45,6 +49,7 @@ class Game:
         }
         print()
         print("Trumps = " + suitDict[trump])
+        self.trumps.append(trump)
         deck = Deck()#make deck
         deck.shuffle()#shuffle deck
 
@@ -86,7 +91,6 @@ class Game:
                 player.addHandHistory(saveCards)
             cardList = [] #cardlist the trick will be passed into
             print("first = " + str(first + 1))
-            self.currentLead.append(first)
             options = self.playerList[first].getOptions() #lead player collects all the possible plays it can make
             print("player " + str(first + 1) + "'s turn:")
             leadCard = self.playerList[first].playRandomOption(options) #lead player chooses a play from its options

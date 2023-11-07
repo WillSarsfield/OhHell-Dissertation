@@ -6,7 +6,7 @@ import math
 import time
 
 class PlayerWindow(tk.Tk):
-    def __init__(self, playerList, player, cardsPlayed, winningCards, currentLead, currentBids):
+    def __init__(self, playerList, player, cardsPlayed, winningCards, currentLead, currentBids, trumps):
         super().__init__()
         self.playerList = playerList
         self.player = player
@@ -14,13 +14,14 @@ class PlayerWindow(tk.Tk):
         self.winningCards = winningCards
         self.currentLead = currentLead
         self.currentBids = currentBids
+        self.trumps = trumps
         self.title("Declaration Whist")
         self.geometry("650x650")
         self.resizable(False,False)
         self.bind("<Escape>", lambda event: self.destroy())
         self.bind('<Return>', self.on_key_press)
         self.frame = 0
-        self.round = 1
+        self.round = 0
         self.roundFrame = self.round
 
         self.background_image = tk.PhotoImage(file="Assets/grass.png")
@@ -28,11 +29,13 @@ class PlayerWindow(tk.Tk):
         self.background_label.place(x=0, y=0, relwidth=1, relheight=1)
 
         self.player_label = tk.Label(self, text = self.player.getName(), font = ("Terminal", 24))
-        self.player_label.grid(row=0,column=0)
+        self.player_label.grid(row=0,column=0, padx=10, pady=10)
         self.score_label = tk.Label(self, text = f"Score: {self.player.getScoreHistory()[self.frame]}", font = ("Terminal", 16))
-        self.score_label.grid(row=0, column=1)
-        self.lead_label = tk.Label(self, text = "", font = ("Terminal", 16))
+        self.score_label.grid(row=0, column=1, padx=10, pady=10)
+        self.trump_label = tk.Label(self)
+        self.lead_label = tk.Label(self)
         self.bids_frame = tk.Frame(self)
+        self.round_label = tk.Label(self)
 
         self.hand = tk.Frame(self, bd=2, relief=tk.SUNKEN)
         self.hand.place(x=120, y=500, relwidth=0.645, relheight=0.3)
@@ -98,26 +101,36 @@ class PlayerWindow(tk.Tk):
             self.show_card(self.playZone,  self.winningCards[self.frame].getValue(), self.winningCards[self.frame].getSuit(), j, self.card_images)
         self.score_label.destroy()
         self.score_label = tk.Label(self, text = f"Score: {self.player.getScoreHistory()[self.frame]}", font = ("Terminal", 16))
-        self.score_label.grid(row=0, column=1)
+        self.score_label.grid(row=0, column=1, padx=10, pady=10)
         self.lead_label.destroy()
         self.lead_label = tk.Label(self, text = f"Lead: {self.playerList[self.currentLead[self.frame]].getName()}", font = ("Terminal", 16))
-        self.lead_label.grid(row=0,column=2)
-        if not self.player.getHandHistory()[self.frame]:
-            self.round += 1
-            self.roundFrame = self.frame
+        self.lead_label.grid(row=0,column=2, padx=10, pady=10)
         self.bids_frame.destroy()
         self.bids_frame = tk.Frame(self)
-        self.bids_frame.grid(row=1, column=0)
+        self.bids_frame.grid(row=2, column=0, padx=10, pady=10, sticky="w")
         self.bids_label = tk.Label(self.bids_frame, text = f"Bids: ", font = ("Terminal", 16))
         self.bids_label.grid(row=1,column=0)
         for i in range(self.currentLead[self.roundFrame], self.currentLead[self.roundFrame] + len(self.playerList)):
             self.bids_label = tk.Label(self.bids_frame, text = f"{self.playerList[i % len(self.playerList)].getName()} :  {str(self.currentBids[self.round][i % len(self.playerList)])}", font = ("Terminal", 16))
             self.bids_label.grid(row= i + 2,column=0)
-
+        suitDict = {
+        0: "hearts",
+        1: "diamonds",
+        2: "spades",
+        3: "clubs"}
+        self.trump_label.destroy()
+        self.trump_label = tk.Label(self, text = f"Trump: {suitDict[self.trumps[self.round]]}", font = ("Terminal", 16))
+        self.trump_label.grid(row=0, column=3, padx=10, pady=10)
+        self.round_label.destroy()
+        self.round_label = tk.Label(self, text = f"Round: {self.round+1}",  font = ("Terminal", 16))
+        self.round_label.grid(row=1, column=0, padx=10, pady=10, sticky="w")
+        if not self.player.getHandHistory()[self.frame]:
+            self.round += 1
+            self.roundFrame = self.frame
         
 
 if __name__ == "__main__":
-    rounds = 13
+    rounds = 2
     players = 4
     startTime = time.time()
     game = Game(rounds, players)
@@ -127,8 +140,9 @@ if __name__ == "__main__":
     winningCards = game.getWinningCards()
     currentLead = game.getCurrentLead()
     currentBids = game.getCurrentBids()
-    print(currentBids)
+    trumps = game.getTrumps()
+    print(currentLead)
     print("---%s seconds---" % (time.time() - startTime))
     print("Rounds played: " + str(rounds))
-    window = PlayerWindow(playerList, player, cardsPlayed, winningCards, currentLead, currentBids)
+    window = PlayerWindow(playerList, player, cardsPlayed, winningCards, currentLead, currentBids, trumps)
     window.mainloop()
