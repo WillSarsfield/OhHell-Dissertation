@@ -79,7 +79,7 @@ class Game:
 
         self.displayCards.append([])
         self.winningCards.append(None)
-        self.currentLead.append(0)
+        self.currentLead.append(first)
         self.currentBids.append(bids)
         for player in self.playerList:
                 player.addScoreHistory(player.getScore())
