@@ -67,13 +67,13 @@ class Player:
             options = self.hand.getCards()
         return options
     
-    def playRandomOption(self, options): #picks a random card out of the options, removes it from hand, and returns it
+    def playOption(self, options, roundScore): #picks a random card out of the options, removes it from hand, and returns it
         rnd = random.randrange(0, len(options))
         card = options[rnd]
         self.hand.remove(card)
         return card
     
-    def playRandomBid(self, ban, handSize): #picks a random number from 0 to 13
+    def playBid(self, ban, handSize, trump): #picks a random number from 0 to 13
         rnd = ban
         while rnd == ban:
             rnd = random.randrange(0, handSize)

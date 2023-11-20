@@ -65,15 +65,15 @@ class Game:
         bids = []
         for i in range(first , first + len(self.playerList)):
             if (i % len(self.playerList)) != len(self.playerList) - 1:
-                self.playerList[i % len(self.playerList)].playRandomBid(handSize + 1, handSize) #can make random bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
+                self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize, trump) #can make random bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
                 bidTotal += self.playerList[i % len(self.playerList)].getBid()
                 print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
                 bids.append(self.playerList[i % len(self.playerList)].getBid())
             else:
                 if bidTotal < 14: #calculates the bid that is banned for the final player
-                    self.playerList[i % len(self.playerList)].playRandomBid(handSize - bidTotal, handSize)
+                    self.playerList[i % len(self.playerList)].playBid(handSize - bidTotal, handSize)
                 else:
-                    self.playerList[i % len(self.playerList)].playRandomBid(handSize + 1, handSize)
+                    self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize)
                 print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
                 bids.append(self.playerList[i % len(self.playerList)].getBid())
 
@@ -93,13 +93,13 @@ class Game:
             print("first = " + str(first + 1))
             options = self.playerList[first].getOptions() #lead player collects all the possible plays it can make
             print("player " + str(first + 1) + "'s turn:")
-            leadCard = self.playerList[first].playRandomOption(options) #lead player chooses a play from its options
+            leadCard = self.playerList[first].playOption(options, trump, self.playerList[first].getRoundScore(), cardList) #lead player chooses a play from its options
             print(leadCard)
             cardList.append(leadCard) #lead card is added to the trick
             for i in range(first + 1 , first + len(self.playerList)): #iterate over remaining players choices in order ascending from first player
                 options = self.playerList[i % len(self.playerList)].getOptions(leadCard.getSuit()) #player collects all the possible plays it can make
                 print("player " + str((i % len(self.playerList)) + 1) + "'s turn:")
-                card = self.playerList[i % len(self.playerList)].playRandomOption(options) #player chooses a play from its options
+                card = self.playerList[i % len(self.playerList)].playOption(options, trump, self.playerList[i % len(self.playerList)].getRoundScore(), cardList) #player chooses a play from its options
                 print(card)
                 cardList.append(card) #card played added to list
             self.displayCards.append(cardList) #save cards in the trick to be displayed

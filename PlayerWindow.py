@@ -44,7 +44,8 @@ class PlayerWindow(tk.Tk):
         self.playZone.place(x=192, y=162, relwidth=0.4, relheight=0.4)
 
         self.winZone = tk.Frame(self, bd=2, relief=tk.SUNKEN)
-        self.winZone.place(x=192, y=360, relwidth=0.4, relheight=0.1)
+        self.winZone.place(x=192, y=360, relwidth=0.4, relheight=0.12)
+        self.winner_label = tk.Label(self.winZone)
 
         suitDict = {
             0: "hearts",
@@ -108,9 +109,21 @@ class PlayerWindow(tk.Tk):
         for card in self.cardsPlayed[self.frame]:
             self.show_card(self.playZone, card.getValue(), card.getSuit(), j, self.card_images)
             j+=1
-        j = 100
+        j = 1
+        self.winZone.destroy()
+        self.winZone = tk.Frame(self, bd=2, relief=tk.SUNKEN)
+        self.winZone.place(x=192, y=360, relwidth=0.4, relheight=0.12)
+        x = 0
+        for card in self.cardsPlayed[self.frame]:
+            if card.getValue() == self.winningCards[self.frame].getValue() and card.getSuit() == self.winningCards[self.frame].getSuit():
+                winner = currentLead[self.frame-1] + x
+                break
+            x += 1
+        winning_player = self.playerList[winner % len(self.playerList)]
+        self.winner_label = tk.Label(self.winZone, text = f"Winner: {winning_player.getName()}", font = ("Terminal", 16))
+        self.winner_label.grid(row=0, column=0)
         if self.winningCards[self.frame] != None:
-            self.show_card(self.playZone,  self.winningCards[self.frame].getValue(), self.winningCards[self.frame].getSuit(), j, self.card_images)
+            self.show_card(self.winZone,  self.winningCards[self.frame].getValue(), self.winningCards[self.frame].getSuit(), j, self.card_images)
         self.score_label.destroy()
         self.score_label = tk.Label(self, text = f"Score: {self.player.getScoreHistory()[self.frame]}", font = ("Terminal", 16))
         self.score_label.grid(row=0, column=1, padx=10, pady=10)
