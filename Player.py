@@ -67,7 +67,7 @@ class Player:
             options = self.hand.getCards()
         return options
     
-    def playOption(self, options, roundScore): #picks a random card out of the options, removes it from hand, and returns it
+    def playOption(self, options, cardsPlayed, trump): #picks a random card out of the options, removes it from hand, and returns it
         rnd = random.randrange(0, len(options))
         card = options[rnd]
         self.hand.remove(card)

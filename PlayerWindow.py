@@ -83,6 +83,9 @@ class PlayerWindow(tk.Tk):
     def on_key_press(self, event):
         self.frame += 1
         if len(self.player.getHandHistory()) <= self.frame:
+            self.score_label.destroy()
+            self.score_label = tk.Label(self, text = f"Score: {self.player.getScoreHistory()[-1]}", font = ("Terminal", 16))
+            self.score_label.grid(row=0, column=1, padx=10, pady=10)
             self.bids_frame.destroy()
             self.bids_frame = tk.Frame(self)
             self.bids_frame.grid(row=2, column=0, padx=10, pady=10, sticky="w")
@@ -114,6 +117,7 @@ class PlayerWindow(tk.Tk):
         self.winZone = tk.Frame(self, bd=2, relief=tk.SUNKEN)
         self.winZone.place(x=192, y=360, relwidth=0.4, relheight=0.12)
         x = 0
+        winner = currentLead[self.frame-1]
         for card in self.cardsPlayed[self.frame]:
             if card.getValue() == self.winningCards[self.frame].getValue() and card.getSuit() == self.winningCards[self.frame].getSuit():
                 winner = currentLead[self.frame-1] + x
@@ -157,8 +161,9 @@ class PlayerWindow(tk.Tk):
 if __name__ == "__main__":
     rounds = 2
     players = 4
+    playerStrengths = [1,0,0,0]
     startTime = time.time()
-    game = Game(rounds, players)
+    game = Game(rounds, players, playerStrengths)
     playerList = game.getPlayers()
     player = game.getPlayers()[0]
     cardsPlayed = game.getCardsPlayed()
@@ -166,6 +171,10 @@ if __name__ == "__main__":
     currentLead = game.getCurrentLead()
     currentBids = game.getCurrentBids()
     trumps = game.getTrumps()
+    for hand in player.getHandHistory():
+        for card in hand:
+            print(card, end=" ")
+        print()
     print("---%s seconds---" % (time.time() - startTime))
     print("Rounds played: " + str(rounds))
     window = PlayerWindow(playerList, player, cardsPlayed, winningCards, currentLead, currentBids, trumps)
