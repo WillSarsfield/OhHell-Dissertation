@@ -2,13 +2,13 @@ from Game import Game
 import time
 import sys, os
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 informedPlayerScores = []
 randomPlayerScores = []
 rounds = 26
 players = 4
-playerStrengths1 = [1,1,1,0]
+playerStrengths1 = [1,0,0,0]
 playerStrengths2 = [0,0,0,0]
 verbose = False
 samples = 100
@@ -24,6 +24,17 @@ print("---%s seconds---" % (time.time() - startTime))
 print("Rounds played: " + str(rounds))
 informednp = np.array(informedPlayerScores)
 randomnp = np.array(randomPlayerScores)
+plt.plot(informedPlayerScores, label='Informed Player mk 1')
+plt.plot(randomPlayerScores, label='Random Player')
+
+# Adding labels and title
+plt.xlabel('Sample')
+plt.ylabel('Player Score')
+plt.title('Performance Trends of Informed and Random Players')
+plt.legend()  # Show legend
+
+# Display the plot
+plt.show()
 print("informed mean: " + str(np.mean(informednp)))
 print("informed standard deviation: " + str(np.std(informednp)))
 print("random mean: " + str(np.mean(randomnp)))
