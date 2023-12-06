@@ -115,10 +115,9 @@ class InformedPlayer(Player):
         bid = ban
         while bid == ban:
             bid = 0
+            print([self.getWinningProbability(card, trump) for card in self.hand.getCards()])
             for card in self.hand.getCards():
-                rnd = random.randrange(7, handSize)
-                if rnd <= card.getValue():
+                if self.getWinningProbability(card, trump) > 0.7:
                     bid += 1
-                elif card.getSuit() == trump and card.getValue() > 7:
-                    bid += 1
+                    print(f"{card}: {self.getWinningProbability(card, trump)}")
         self.bid = bid
