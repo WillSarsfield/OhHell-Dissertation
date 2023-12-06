@@ -9,6 +9,7 @@ class Player:
         self.bid = 0 #bid for current round
         self.handHistory = []
         self.scoreHistory = []
+        self.bidsMade = 0
     
     def getName(self):
         return self.name
@@ -43,6 +44,12 @@ class Player:
     
     def makeBid(self, bid):
         self.bid = bid
+
+    def getBidsMade(self):
+        return self.bidsMade
+
+    def updateBidsMade(self):
+        self.bidsMade += 1
 
     def addHandHistory(self, cards):
         self.handHistory.append(cards)

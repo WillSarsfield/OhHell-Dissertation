@@ -119,6 +119,7 @@ class Game:
             player.addHandHistory([])
             if player.getRoundScore() == player.getBid():
                 player.addScore(10 + player.getRoundScore())
+                player.updateBidsMade()
             else:
                 player.addScore(player.getRoundScore())
             player.addScoreHistory(player.getScore())
