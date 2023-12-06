@@ -8,6 +8,11 @@ class Card:#basic class defining individual cards through integers
     
     def getValue(self):
         return self.value
+
+    def equalTo(self, card):
+        if self.value == card.value and self.suit == card.suit:
+            return True
+        return False
     
     def __str__(self):#print card translates integers used for suits and values to correct symbols
         suitDict = {

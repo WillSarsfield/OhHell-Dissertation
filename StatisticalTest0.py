@@ -24,7 +24,7 @@ print("---%s seconds---" % (time.time() - startTime))
 print("Rounds played: " + str(rounds))
 informednp = np.array(informedPlayerScores)
 randomnp = np.array(randomPlayerScores)
-plt.plot(informedPlayerScores, label='Informed Player mk 1')
+plt.plot(informedPlayerScores, label='Informed Player mk 2')
 plt.plot(randomPlayerScores, label='Random Player')
 
 # Adding labels and title

@@ -27,6 +27,10 @@ class Deck:
     
     def shuffle(self):#shuffle deck function
         random.shuffle(self.cardList)
+    
+    def removeCard(self, card):
+        newList = [c for c in self.cardList if not c.equalTo(card)]
+        self.cardList = newList
 
     def makeHand(self, i):#deals hand of i cards from the top of the deck
         cards = self.cardList[:i]
