@@ -7,12 +7,12 @@ class InformedPlayer(Player):
     def __init__(self, name):
         super().__init__(name)
         self.cardsInDeck = Deck()
-
+        
     def updateCardsInDeck(self, cards):
         for card in cards:
             self.cardsInDeck.removeCard(card)
 
-    def playOption(self, options, cardsPlayed, trump):
+    def playOption(self, options, cardsPlayed, trump, players):
         self.updateCardsInDeck(cardsPlayed)
         #print(f"cards left: {self.cardsInDeck}")
         if len(options) == 1:
@@ -27,15 +27,18 @@ class InformedPlayer(Player):
             losingOptions = self.getLosingOptions(options, cardsPlayed, trump)
             if self.roundScore < self.bid or self.roundScore > self.bid: # if not at the bid then keep winning
                 if winningOptions: # if a choice can be made that wins, choose the most likely to win given the remaining cards
-                    winningProbabilities = [self.getWinningProbability(option, trump) for option in winningOptions]
+                    winningProbabilities = [self.getWinningProbabilityPlay(option, cardsPlayed[0].getSuit(), trump) for option in winningOptions]
                     print(winningProbabilities)
-                    choice = winningOptions[winningProbabilities.index(max(winningProbabilities))]
+                    if len(cardsPlayed) == players - 1:
+                        choice = winningOptions[winningProbabilities.index(min(winningProbabilities))]
+                    else:
+                        choice = winningOptions[winningProbabilities.index(max(winningProbabilities))]
                     for option in winningOptions:
                         print(option, end = " ")
                     print()
                     print(choice)
                 else: # if no choices can be made that win, choose the least likely to win given the remaining cards
-                    winningProbabilities = [self.getWinningProbability(option, trump) for option in options]
+                    winningProbabilities = [self.getWinningProbabilityPlay(option, cardsPlayed[0].getSuit(), trump) for option in options]
                     print(winningProbabilities)
                     choice = options[winningProbabilities.index(min(winningProbabilities))]
                     for option in options:
@@ -44,9 +47,12 @@ class InformedPlayer(Player):
                     print(choice)
             if self.roundScore == self.bid: # if bid is reached then keep losing
                 if losingOptions: # if there is an option to lose, then lose by throwing the most valuable card away
-                    winningProbabilities = [self.getWinningProbability(option, trump) for option in losingOptions]
+                    winningProbabilities = [self.getWinningProbabilityPlay(option, cardsPlayed[0].getSuit(), trump) for option in losingOptions]
                     print(winningProbabilities)
-                    choice = losingOptions[winningProbabilities.index(min(winningProbabilities))]
+                    if len(cardsPlayed) == players - 1:
+                        choice = losingOptions[winningProbabilities.index(max(winningProbabilities))]
+                    else:
+                        choice = losingOptions[winningProbabilities.index(min(winningProbabilities))]
                     for option in losingOptions:
                         print(option, end = " ")
                     print()
@@ -55,7 +61,7 @@ class InformedPlayer(Player):
                     rnd = random.randrange(0, len(options))
                     choice = options[rnd]
         else: # if leading play the best or worst option depending on the remain cards
-            winningProbabilities = [self.getWinningProbability(option, trump) for option in options]
+            winningProbabilities = [self.getWinningProbabilityPlay(option, option.getSuit(), trump) for option in options]
             print(winningProbabilities)
             bestOption = options[winningProbabilities.index(max(winningProbabilities))]
             worstOption = options[winningProbabilities.index(min(winningProbabilities))]
@@ -71,17 +77,37 @@ class InformedPlayer(Player):
         self.hand.remove(choice)
         return choice
 
-    def getWinningProbability(self, card, trump):
+    def getWinningProbabilityPlay(self, card, leadSuit, trump):
         winCount = 0
+        # chance card beats other cards
         for c in self.cardsInDeck.getCards():
-            if trump == c.getSuit() and card.getSuit() == trump and card.getValue() > c.getValue():
+                if card.beats(c, leadSuit, trump):
                     winCount += 1
-            elif trump != c.getSuit():
-                if card.getSuit() == c.getSuit() and card.getValue() > c.getValue():
-                    winCount +=1
-                elif card.getSuit() == trump:
-                    winCount +=1
-        return winCount/len(self.cardsInDeck.getCards())
+        
+        return (winCount/len(self.cardsInDeck.getCards()))
+    
+    def getWinningProbabilityBid(self, card, lead, trump):
+        winCount = 0
+        # chance card beats other cards
+        if lead:
+            for c in self.cardsInDeck.getCards():
+                if card.beats(c, card.getSuit(), trump):
+                    winCount += 1
+        else:
+            for c in self.cardsInDeck.getCards():
+                if card.beats(c, c.getSuit(), trump):
+                    winCount += 1
+        # chance card wins if in suit
+        # sameSuitCards = 0
+        # winSuitCards = 0
+        # for c in self.cardsInDeck.getCards():
+        #     if c.getSuit() == card.getSuit():
+        #         sameSuitCards += 1
+        #         if c.getValue() < card.getValue():
+        #             winSuitCards += 1
+                
+        
+        return (winCount/len(self.cardsInDeck.getCards())) #* (winSuitCards/sameSuitCards)
     
     def getWinningOptions(self, options, cardsPlayed, trump):
         winningCard = cardsPlayed[0]
@@ -109,15 +135,18 @@ class InformedPlayer(Player):
         winningOptions = self.getWinningOptions(options, cardsPlayed, trump)
         return [option for option in options if option not in winningOptions]
 
-    def playBid(self, ban, handSize, trump):
+    def playBid(self, ban, handSize, trump, lead, players):
         self.cardsInDeck = Deck()
         self.updateCardsInDeck(self.hand.getCards())
         bid = ban
         while bid == ban:
             bid = 0
-            print([self.getWinningProbability(card, trump) for card in self.hand.getCards()])
+            print([self.getWinningProbabilityBid(card, lead, trump) for card in self.hand.getCards()])
             for card in self.hand.getCards():
-                if self.getWinningProbability(card, trump) > 0.7:
+                print(card, end = " ")
+            print()
+            for card in self.hand.getCards():
+                if self.getWinningProbabilityBid(card, lead, trump) > 0.7:
                     bid += 1
-                    print(f"{card}: {self.getWinningProbability(card, trump)}")
+                    print(f"{card}: {self.getWinningProbabilityBid(card, lead, trump)}")
         self.bid = bid

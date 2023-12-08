@@ -72,15 +72,18 @@ class Game:
         bids = []
         for i in range(first , first + len(self.playerList)):
             if (i % len(self.playerList)) != len(self.playerList) - 1:
-                self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize, trump) #can make bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
+                if i == first:
+                    self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize, trump, True, len(self.playerList)) #can make bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
+                else:
+                    self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize, trump, False, len(self.playerList))
                 bidTotal += self.playerList[i % len(self.playerList)].getBid()
                 print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
                 bids.append(self.playerList[i % len(self.playerList)].getBid())
             else:
                 if bidTotal < 14: #calculates the bid that is banned for the final player
-                    self.playerList[i % len(self.playerList)].playBid(handSize - bidTotal, handSize, trump)
+                    self.playerList[i % len(self.playerList)].playBid(handSize - bidTotal, handSize, trump, False, len(self.playerList))
                 else:
-                    self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize, trump)
+                    self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize, trump, False, len(self.playerList))
                 print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
                 bids.append(self.playerList[i % len(self.playerList)].getBid())
 
@@ -100,13 +103,13 @@ class Game:
             print("first = " + str(first + 1))
             options = self.playerList[first].getOptions() #lead player collects all the possible plays it can make
             print("player " + str(first + 1) + "'s turn:")
-            leadCard = self.playerList[first].playOption(options, cardList, trump) #lead player chooses a play from its options
+            leadCard = self.playerList[first].playOption(options, cardList, trump, len(self.playerList)) #lead player chooses a play from its options
             print(leadCard)
             cardList.append(leadCard) #lead card is added to the trick
             for i in range(first + 1 , first + len(self.playerList)): #iterate over remaining players choices in order ascending from first player
                 options = self.playerList[i % len(self.playerList)].getOptions(leadCard.getSuit()) #player collects all the possible plays it can make
                 print("player " + str((i % len(self.playerList)) + 1) + "'s turn:")
-                card = self.playerList[i % len(self.playerList)].playOption(options, cardList, trump) #player chooses a play from its options
+                card = self.playerList[i % len(self.playerList)].playOption(options, cardList, trump, len(self.playerList)) #player chooses a play from its options
                 print(card)
                 cardList.append(card) #card played added to list
             self.displayCards.append(cardList) #save cards in the trick to be displayed

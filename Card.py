@@ -13,6 +13,18 @@ class Card:#basic class defining individual cards through integers
         if self.value == card.value and self.suit == card.suit:
             return True
         return False
+
+    def beats(self, card, leadSuit, trump):
+        if trump == card.getSuit() and self.getSuit() == trump and self.getValue() > card.getValue():
+            return True
+        elif trump != card.getSuit():
+            if self.getSuit() == leadSuit and card.getSuit() == leadSuit and self.getValue() > card.getValue():
+                return True
+            elif self.getSuit() == trump:
+                return True
+            elif self.getSuit() == leadSuit and card.getSuit() != leadSuit:
+                return True
+        return False
     
     def __str__(self):#print card translates integers used for suits and values to correct symbols
         suitDict = {
