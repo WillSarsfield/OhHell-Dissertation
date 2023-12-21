@@ -19,8 +19,6 @@ class Deck:
             string += card.__str__()
             string += "  "
         return string
-        
-
     
     def getCards(self):
         return self.cardList
@@ -36,3 +34,9 @@ class Deck:
         cards = self.cardList[:i]
         del self.cardList[:i]
         return cards
+    
+    def contains(self, card):
+        for c in self.cardList:
+            if card.equalTo(c):
+                return True
+        return False

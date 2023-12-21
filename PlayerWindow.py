@@ -161,9 +161,9 @@ class PlayerWindow(tk.Tk):
 if __name__ == "__main__":
     rounds = 2
     players = 4
-    playerStrengths = [1,0,0,0]
+    playerStrengths = [1,1,1,1]
     startTime = time.time()
-    game = Game(rounds, players, playerStrengths)
+    game = Game(rounds, players, playerStrengths, True)
     playerList = game.getPlayers()
     player = game.getPlayers()[0]
     cardsPlayed = game.getCardsPlayed()
