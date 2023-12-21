@@ -1,6 +1,7 @@
 from Player import Player
 from Deck import Deck
 import random
+import numpy as np
 
 class InformedPlayer(Player):
     
@@ -78,30 +79,60 @@ class InformedPlayer(Player):
         return choice
     
     def getWinningProbability(self, card, leadSuit, lead, trump):
-        winCount = 0
         # chance card beats other cards
-        if lead:
+        def winProb(weight, leadSuit):
+            winCount = 0
+            for c in self.cardsInDeck.getCards():
+                if card.beats(c, leadSuit, trump):
+                    winCount += 1
+            return weight*winCount/len(self.cardsInDeck.getCards())
+        
+        # chance card beats cards in its own suit
+        def sameSuitProb(weight):
             sameSuit = 0
             sameSuitWins = 0
-            for c in self.cardsInDeck.getCards():
-                if card.beats(c, card.getSuit(), trump):
-                    winCount += 1
             for c in self.cardsInDeck.getCards():
                 if c.getSuit() == card.getSuit():
                     sameSuit += 1
                     if card.beats(c, card.getSuit(), trump):
                         sameSuitWins += 1
             if sameSuit != 0:
-                return (winCount/len(self.cardsInDeck.getCards())) * (sameSuitWins/sameSuit)
+                return weight*sameSuitWins/sameSuit
             else:
-                return (winCount/len(self.cardsInDeck.getCards()))
-
-        else:
+                return weight
+            
+        # chance for cards follow suit
+        def followSuitProb(weight):
+            sameSuit = 0
             for c in self.cardsInDeck.getCards():
-                if card.beats(c, leadSuit, trump):
-                    winCount += 1
+                if c.getSuit() == card.getSuit():
+                    sameSuit += 1
+            return weight*sameSuit/len(self.cardsInDeck.getCards())
+        
+        # chance of being trumped
+        def trumpProb(weight):
+            if card.getSuit() == trump:
+                return weight
+            trumps = 0
+            for c in self.cardsInDeck.getCards():
+                if c.getSuit() == trump:
+                        trumps += 1
+            return weight*(trumps/len(self.cardsInDeck.getCards()))
+        
+        def suitSafety(weight):
+            sameSuit = 0
+            for c in self.hand.getCards():
+                if c.getSuit() == card.getSuit():
+                    sameSuit += 1
+            return weight*sameSuit/len(self.hand.getCards())
+        
+        if lead:
+           return winProb(0.1, card.getSuit()) + sameSuitProb(0.45) + followSuitProb(0.15) + trumpProb(0.15) + suitSafety(0.15)
+        elif leadSuit == None:
+            return followSuitProb(0.2) + sameSuitProb(0.4) + trumpProb(0.2) + suitSafety(0.2)
+        else:
+            return winProb(0.2, leadSuit) + sameSuitProb(0.4) + followSuitProb(0.25) + trumpProb(0.15)
 
-        return (winCount/len(self.cardsInDeck.getCards()))
     
     def getWinningOptions(self, options, cardsPlayed, trump):
         winningCard = cardsPlayed[0]
@@ -129,18 +160,22 @@ class InformedPlayer(Player):
         winningOptions = self.getWinningOptions(options, cardsPlayed, trump)
         return [option for option in options if option not in winningOptions]
 
-    def playBid(self, ban, handSize, trump, lead, players):
+    def playBid(self, ban, handSize, trump, lead, players, bids):
         self.cardsInDeck = Deck()
         self.updateCardsInDeck(self.hand.getCards())
         bid = ban
         while bid == ban:
             bid = 0
-            print([self.getWinningProbability(card, None, lead, trump) for card in self.hand.getCards()])
+            npWinProbs = np.array([self.getWinningProbability(card, None, lead, trump) for card in self.hand.getCards()])
+            print(npWinProbs)
             for card in self.hand.getCards():
                 print(card, end = " ")
             print()
+            print(np.mean(npWinProbs))
             for card in self.hand.getCards():
-                if self.getWinningProbability(card, None, lead, trump) > 0.7:
+                if self.getWinningProbability(card, None, lead, trump) > 0.5:
                     bid += 1
                     print(f"{card}: {self.getWinningProbability(card, None, lead, trump)}")
+            if bid == ban:
+                bid += 1
         self.bid = bid

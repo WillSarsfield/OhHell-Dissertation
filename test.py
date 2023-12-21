@@ -6,10 +6,9 @@ import matplotlib as plt
 
 informedPlayerScores = []
 randomPlayerScores = []
-rounds = 1
+rounds = 2
 players = 4
-playerStrengths1 = [1,0,0,0]
-playerStrengths2 = [0,0,0,0]
+playerStrengths1 = [1,1,1,1]
 verbose = True
 samples = 1
 startTime = time.time()
@@ -20,8 +19,6 @@ sys.stdout = sys.__stdout__
 print("---%s seconds---" % (time.time() - startTime))
 print("Rounds played: " + str(rounds))
 informednp = np.array(informedPlayerScores)
-randomnp = np.array(randomPlayerScores)
 print("informed mean: " + str(np.mean(informednp)))
 print("informed standard deviation: " + str(np.std(informednp)))
-print("random mean: " + str(np.mean(randomnp)))
-print("random standard deviation: " + str(np.std(randomnp)))
+

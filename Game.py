@@ -73,17 +73,17 @@ class Game:
         for i in range(first , first + len(self.playerList)):
             if (i % len(self.playerList)) != len(self.playerList) - 1:
                 if i == first:
-                    self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize, trump, True, len(self.playerList)) #can make bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
+                    self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize, trump, True, len(self.playerList), bids) #can make bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
                 else:
-                    self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize, trump, False, len(self.playerList))
+                    self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize, trump, False, len(self.playerList), bids)
                 bidTotal += self.playerList[i % len(self.playerList)].getBid()
                 print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
                 bids.append(self.playerList[i % len(self.playerList)].getBid())
             else:
                 if bidTotal < 14: #calculates the bid that is banned for the final player
-                    self.playerList[i % len(self.playerList)].playBid(handSize - bidTotal, handSize, trump, False, len(self.playerList))
+                    self.playerList[i % len(self.playerList)].playBid(handSize - bidTotal, handSize, trump, False, len(self.playerList), bids)
                 else:
-                    self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize, trump, False, len(self.playerList))
+                    self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize, trump, False, len(self.playerList), bids)
                 print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
                 bids.append(self.playerList[i % len(self.playerList)].getBid())
 

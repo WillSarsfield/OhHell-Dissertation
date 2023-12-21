@@ -80,7 +80,7 @@ class Player:
         self.hand.remove(card)
         return card
     
-    def playBid(self, ban, handSize, trump, lead, players): #picks a random number from 0 to 13
+    def playBid(self, ban, handSize, trump, lead, players, bids): #picks a random number from 0 to 13
         rnd = ban
         while rnd == ban:
             rnd = random.randrange(0, handSize)

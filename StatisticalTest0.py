@@ -10,7 +10,7 @@ def run():
     randomPlayerScores = []
     rounds = 26
     players = 4
-    playerStrengths1 = [1,0,0,0]
+    playerStrengths1 = [1,1,1,1]
     playerStrengths2 = [0,0,0,0]
     verbose = False
     samples = 100
