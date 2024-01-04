@@ -9,7 +9,7 @@ import sys, os
 #Game class that when called plays the number of rounds specified
 
 class Game:
-    def __init__(self, rounds, players, playersStrength, verbose) -> None:
+    def __init__(self, rounds, players, playersStrength, verbose, optimisations = [], best_weights=[]) -> None:
         self.players = players #number of players
         self.playerList = []
         self.handSize = math.floor(52/players)
@@ -24,7 +24,10 @@ class Game:
             if playersStrength[i] == 0:
                 player = Player("player " + str(i+1))#make players with names
             elif playersStrength[i] == 1:
-                player = InformedPlayer("player " + str(i+1))#make players with names
+                if i == 0:
+                    player = InformedPlayer("player " + str(i+1), optimisations)#make players with names
+                else:
+                    player = InformedPlayer("player " + str(i+1), best_weights)#make players with names
             self.playerList.append(player)#add to list of players
         for i in range(0, rounds):#run round function rounds times
             self.round(i % 4, i % self.players, self.handSize)#change the player going first and the trump each time = {0,...,3}

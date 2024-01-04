@@ -13,10 +13,11 @@ def run():
     playerStrengths1 = [1,1,1,1]
     playerStrengths2 = [0,0,0,0]
     verbose = False
-    samples = 100
+    samples = 200
     startTime = time.time()
+    optimisations =  [0.285903516922823, 0.1343298885883228, 0.2513171910666505, 0.2654805206104466, 0.06296888281175703, 0.19781578320406684, 0.40322548219933846, 0.1057952046865951, 0.29316352990999955, 0.24951563665051385, 0.25987660163497556, 0.23694603672039563, 0.25366172499411493]
     for i in range(0, samples):
-        game = Game(rounds, players, playerStrengths1, verbose)
+        game = Game(rounds, players, playerStrengths1, verbose, optimisations, optimisations)
         informedPlayerScores.append(game.getPlayers()[0].getScore())
     for i in range(0, samples):
         game = Game(rounds, players, playerStrengths2, verbose)

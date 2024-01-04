@@ -1,7 +1,7 @@
 import random
 
 class Player:
-    def __init__(self, name) -> None:
+    def __init__(self, name, optimisations=[]) -> None:
         self.name = name
         self.hand = []
         self.score = 0 #cumulative score

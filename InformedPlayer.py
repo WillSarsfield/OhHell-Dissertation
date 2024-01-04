@@ -5,9 +5,10 @@ import numpy as np
 
 class InformedPlayer(Player):
     
-    def __init__(self, name):
+    def __init__(self, name, optimisations):
         super().__init__(name)
         self.cardsInDeck = Deck()
+        self.optimisations = optimisations
         
     def updateCardsInDeck(self, cards):
         for card in cards:
@@ -101,7 +102,7 @@ class InformedPlayer(Player):
             else:
                 return weight
             
-        # chance for cards follow suit
+        # chance for cards to follow suit
         def followSuitProb(weight):
             sameSuit = 0
             for c in self.cardsInDeck.getCards():
@@ -118,7 +119,7 @@ class InformedPlayer(Player):
                 if c.getSuit() == trump:
                         trumps += 1
             return weight*(trumps/len(self.cardsInDeck.getCards()))
-        
+        # buffer cards in hand
         def suitSafety(weight):
             sameSuit = 0
             for c in self.hand.getCards():
@@ -127,11 +128,11 @@ class InformedPlayer(Player):
             return weight*sameSuit/len(self.hand.getCards())
         
         if lead:
-           return winProb(0.1, card.getSuit()) + sameSuitProb(0.45) + followSuitProb(0.15) + trumpProb(0.15) + suitSafety(0.15)
+           return winProb(self.optimisations[0], card.getSuit()) + sameSuitProb(self.optimisations[1]) + followSuitProb(self.optimisations[2]) + trumpProb(self.optimisations[3]) + suitSafety(self.optimisations[4])
         elif leadSuit == None:
-            return followSuitProb(0.2) + sameSuitProb(0.4) + trumpProb(0.2) + suitSafety(0.2)
+            return followSuitProb(self.optimisations[5]) + sameSuitProb(self.optimisations[6]) + trumpProb(self.optimisations[7]) + suitSafety(self.optimisations[8])
         else:
-            return winProb(0.2, leadSuit) + sameSuitProb(0.4) + followSuitProb(0.25) + trumpProb(0.15)
+            return winProb(self.optimisations[9], leadSuit) + sameSuitProb(self.optimisations[10]) + followSuitProb(self.optimisations[11]) + trumpProb(self.optimisations[12])
 
     
     def getWinningOptions(self, options, cardsPlayed, trump):
