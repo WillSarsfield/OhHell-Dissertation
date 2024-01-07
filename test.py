@@ -1,24 +1,29 @@
-from Game import Game
-import time
-import sys, os
-import numpy as np
-import matplotlib as plt
+from GameTree import GameTree
+from Player import Player
+from Deck import Deck
+from Hand import Hand
 
-informedPlayerScores = []
-randomPlayerScores = []
-rounds = 2
-players = 4
-playerStrengths1 = [1,1,1,1]
-verbose = True
-samples = 1
-startTime = time.time()
-for i in range(0, samples):
-    game = Game(rounds, players, playerStrengths1, verbose)
-    informedPlayerScores.append(game.getPlayers()[0].getScore())
-sys.stdout = sys.__stdout__
-print("---%s seconds---" % (time.time() - startTime))
-print("Rounds played: " + str(rounds))
-informednp = np.array(informedPlayerScores)
-print("informed mean: " + str(np.mean(informednp)))
-print("informed standard deviation: " + str(np.std(informednp)))
+playerList = []
+for i in range(4):
+    player = Player(f"Test{i+1}")
+    playerList.append(player)
 
+deck = Deck()
+deck.shuffle()
+
+for player in playerList: 
+    hand = Hand(deck.makeHand(13))
+    hand.sort()
+    player.makeHand(hand)
+    print(player)
+
+player1_hand = playerList[0].getHand().getCards()
+unseen = Deck()
+for card in player1_hand:
+    unseen.removeCard(card)
+game_tree = GameTree(parent = None, hand = player1_hand, players = 4, bids = [1,2,3,4], max_depth = 5, depth = 0)
+game_tree.determinize(unseen)
+for _ in range(100):
+    selection = game_tree.select_child()
+    expansion = selection.expand()
+print(game_tree.__str__(4))

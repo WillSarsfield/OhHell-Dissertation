@@ -7,20 +7,21 @@ from collections import defaultdict
 
 class GameTree:
 
-    def __init__(self, parent = None, hand = None, other_players_hands = [], cards_played = None, score = 0, players = None, max_depth = None, depth = 0) -> None:
+    def __init__(self, parent = None, hand = None, other_players_hands = [], cards_played = [], score = 0, bids = None, players = None, max_depth = None, depth = 0) -> None:
         self.parent = parent
         self.children = []
         self.hand = hand # cards player has 
         self.other_players_hands = other_players_hands # cards other players have
         self.cards_played = cards_played # cards that have been played in the trick
         self.score = score # current score
+        self.bids = bids
         self.players = players # number of players
         self.max_depth = max_depth
         self.depth = depth
         self.visits = 0 # times node was visited
         self.wins = 0 # times node made bid
         self.choices = []
-        if not cards_played:
+        if len(cards_played) == players or not cards_played:
             self.choices = self.hand
         else:
             self.choices = self.get_choices(self.cards_played[0])
@@ -29,46 +30,32 @@ class GameTree:
 
     def get_choices(self, leadCard):
         choices = []
-        for card in self.hand.getCards(): #add cards of the same suit as the lead to the options
+        for card in self.hand: #add cards of the same suit as the lead to the options
             if card.getSuit() == leadCard.getSuit():
                 choices.append(card)
         if not choices: #if no cards with the same suit as the lead, all cards are options
-            choices = self.hand.getCards()
+            choices = self.hand
         return choices
 
     def determinize(self, unseen):
         # already played a card in trick so must deduct cards from initial players hands
-        indent = len(self.cards_played)
+        indent = 0
+        if self.cards_played:
+            indent = len(self.cards_played)
         # select random distribution of unseen cards for other players to have
-        for _ in range(self.players):
+        for _ in range(self.players - 1):
             if indent > 0:
-                random_hand = random.sample(unseen.getCards(), k=len(self.hand_size - 1))
+                random_hand = random.sample(unseen.getCards(), k=len(self.hand) - 1)
             else:
-                random_hand = random.sample(unseen.getCards(), k=len(self.hand_size))
+                random_hand = random.sample(unseen.getCards(), k=len(self.hand))
+                for card in random_hand:
+                    print(card, end = " ")
+                print()
             indent -= 1
             self.other_players_hands.append(random_hand)
             # remove selected cards from unseen
             for card in random_hand:
                 unseen.removeCard(card)
-        # create the child nodes of the current state based on the determinized game
-        next_player_hand = []
-        other_players_hands = copy.deepcopy(self.other_players_hands)
-        end = True
-        # update the next player's hand and that players opponent hands
-        for i, hand in enumerate(self.other_players_hands):
-            if len(hand) == len(self.hand):
-                next_player_hand = hand
-                other_players_hands[i] = self.hand
-                end = False
-                break
-        # update the cards played
-        cards_played = copy.deepcopy(self.cards_played)
-        for choice in self.choices:
-            if end:
-                cards_played = []
-            else:
-                cards_played.append(choice)
-            child = GameTree(self, next_player_hand, other_players_hands, cards_played)
     
     def select_choice(self):
         best_child = max(self.children, key=lambda child: child.wins)
@@ -83,20 +70,17 @@ class GameTree:
 
     def select_child(self, exploration_weight=1.4):
         """Select a child node using UCT (Upper Confidence Bound for Trees) formula"""
+        # if no children, select itself
         if not self.children:
             return self
-
-        if self.visits == 0:
-            # No visits yet, randomly select a child
-            return random.choice(self.children)
-
-        log_total_visits = math.log(self.visits)
-
-        for child in self.children:
-            if child.visits == 0:
-                return child
+        if self.visits:
+            log_total_visits = math.log(self.visits)
+        # if all choices do not have a node, select itself
+        if len(self.children) < len(self.choices):
+            return self
 
         def uct_value(child):
+            return 1
             exploitation_term = child.wins / child.visits
             exploration_term = exploration_weight * math.sqrt((2*log_total_visits) / child.visits)
             #print(exploitation_term + exploration_term)
@@ -109,17 +93,51 @@ class GameTree:
 
     def expand(self):
         """Expand the node by adding a new child"""
-        if self.choices:
-            choice = random.choice(self.choices)
-            new_board = np.copy(self.board)
-            new_board[choice[0], choice[1]] = self.colour
-            new_choices = list(zip(*np.where(new_board == 0)))
-            child = GameTree(self, new_board, new_choices, self.opp_colour(self.colour), self.root_colour, self.max_depth, self.depth + 1, self.width, self.board_size, self.time_start)  
-            self.children.append(child)
-            return child
+        # create the child nodes of the current state based on the determinized game
+        # update the cards played
         if not self.choices:
             return self
-        return None
+        new_choice = None
+
+        if self.children:
+            for choice in self.choices:
+                premade = False
+                for child in self.children:
+                    if child.cards_played[-1].equalTo(choice):
+                        premade = True
+                    
+                if not premade:
+                    new_choice = choice
+                if new_choice:
+                    break
+        else:
+            new_choice = self.choices[0]
+
+        next_player_hand = []
+        other_players_hands = copy.deepcopy(self.other_players_hands)
+        new_bids = copy.deepcopy(self.bids)
+        new_hand = []
+        for card in self.hand:
+            if not card.equalTo(new_choice):
+                new_hand.append(card)
+
+        # update the next player's hand and that player's opponent hands
+        for i, hand in enumerate(self.other_players_hands):
+            if len(hand) == len(self.hand):
+                next_player_hand = hand
+                temp = new_bids[0]
+                new_bids[0] = new_bids[i + 1]
+                new_bids[i + 1] = temp
+                other_players_hands[i] = new_hand
+                break
+        cards_played = copy.deepcopy(self.cards_played)
+        if len(cards_played) == 4:
+            cards_played = []
+
+        cards_played.append(new_choice)
+        child = GameTree(self, next_player_hand, other_players_hands, cards_played, self.score, new_bids, self.players, self.max_depth, self.depth + 1)
+        self.children.append(child)
+        return child
 
     def simulate(self):
         """Simulate a random playout from a expanded node"""
@@ -134,7 +152,7 @@ class GameTree:
         pass
         while True: # until there are no more random moves to make, keep making random moves
             pass
-        return self.evaluate(board) # return the evaluation of the final board with no choices left
+        return self.evaluate(board) # return the evaluation of the final state
 
     def evaluate(self, score):
         pass
@@ -150,6 +168,11 @@ class GameTree:
 
     def __str__(self, depth):
         """Returns the tree as a tree structure in depth-first order"""
+        def hand_as_string(hand):
+            hand_str = ""
+            for card in hand:
+                hand_str += card.__str__()
+            return hand_str
         output = ""
         # Add spaces based on depth
         indentation = " " * (self.depth * 4)
@@ -162,6 +185,12 @@ class GameTree:
                 line_symbol = "├── "
             output += f"{indentation}{line_symbol}"
         output += f"depth={self.depth}, wins={self.wins}, visits={self.visits}, children = {len(self.children)}\n"
+        output += f"{indentation}├hand = {hand_as_string(self.hand)}\n"
+        output += f"{indentation}├choices = {hand_as_string(self.choices)}\n"
+        
+        # for hand in self.other_players_hands:
+        #     output += f"{indentation}├next_hand = {hand_as_string(hand)}\n"
+        
 
         for child in self.children:
             if child.depth > depth:
