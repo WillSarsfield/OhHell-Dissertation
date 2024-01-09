@@ -7,7 +7,7 @@ from collections import defaultdict
 
 class GameTree:
 
-    def __init__(self, parent = None, hands = [], cards_played = [], scores = [], bids = None, players = None, trump = None, current_player = 0, initial_player = None, max_depth = None, depth = 0) -> None:
+    def __init__(self, parent = None, hands = [], cards_played = [], scores = [], bids = None, players = None, trump = None, current_player = 0, initial_player = 0, max_depth = None, depth = 0) -> None:
         self.parent = parent
         self.children = []
         self.hands = hands # cards player has 
@@ -40,7 +40,8 @@ class GameTree:
             choices = hand
         return choices
 
-    def determinize(self, unseen):
+    def determinize(self, cardsInDeck):
+        unseen = copy.deepcopy(cardsInDeck)
         # already played a card in trick so must deduct cards from initial players hands
         indent = 0
         if self.cards_played:
@@ -86,7 +87,7 @@ class GameTree:
         """Expand the node by adding a new child"""
         # create the child nodes of the current state based on the determinized game
         # update the cards played
-        if not self.choices:
+        if not self.choices or self.depth >= self.max_depth:
             return self
         
         if self.unprocessed_choices:
@@ -167,10 +168,13 @@ class GameTree:
                 cards_played = []
 
     def evaluate(self, scores):
-        if self.bids[self.initial_player] == scores[self.initial_player]:
-            return 1
+        if self.bids:
+            if self.bids[self.i] == scores[self.i]:
+                return scores[self.initial_player] + 10
+            else:
+                return scores[self.initial_player]
         else:
-            return 0
+            return scores[self.initial_player]
 
         
     def backpropagate(self, result):

@@ -1,5 +1,6 @@
 from Player import Player
 from InformedPlayer import InformedPlayer
+from BestAgent import BestAgent
 from Deck import Deck
 from Hand import Hand
 from Card import Card
@@ -9,7 +10,7 @@ import sys, os
 #Game class that when called plays the number of rounds specified
 
 class Game:
-    def __init__(self, rounds, players, playersStrength, verbose, optimisations = [], best_weights=[]) -> None:
+    def __init__(self, rounds, players, playersStrength, verbose=True, optimisations = [], best_weights=[]) -> None:
         self.players = players #number of players
         self.playerList = []
         self.handSize = math.floor(52/players)
@@ -24,13 +25,16 @@ class Game:
             if playersStrength[i] == 0:
                 player = Player("player " + str(i+1))#make players with names
             elif playersStrength[i] == 1:
-                if i == 0:
-                    player = InformedPlayer("player " + str(i+1), optimisations)#make players with names
-                else:
-                    player = InformedPlayer("player " + str(i+1), best_weights)#make players with names
+                player = InformedPlayer("player " + str(i+1), optimisations)#make players with names
+            elif playersStrength[i] == 2:
+                player = BestAgent(f"player {i+1}")
+
             self.playerList.append(player)#add to list of players
         for i in range(0, rounds):#run round function rounds times
             self.round(i % 4, i % self.players, self.handSize)#change the player going first and the trump each time = {0,...,3}
+            for player in self.playerList:
+                print(f"{player.getName()}, score this round: {player.getRoundScore()}, overall score: {player.getScore()}")
+                player.addRoundScore(-player.getRoundScore())
     
     def getPlayers(self):#return player scores for statistics overview
         return self.playerList
@@ -97,8 +101,10 @@ class Game:
         for player in self.playerList:
                 player.addScoreHistory(player.getScore())
         for i in range(0, handSize):
-            for player in self.playerList:#save hand in history for display later
+            scores = [0 for _ in range(len(self.playerList))]
+            for j, player in enumerate(self.playerList):#save hand in history for display later
                 saveCards = []
+                scores[j] = player.getRoundScore()
                 for card in player.getHand().getCards():
                     saveCards.append(card)
                 player.addHandHistory(saveCards)
@@ -106,15 +112,17 @@ class Game:
             print("first = " + str(first + 1))
             options = self.playerList[first].getOptions() #lead player collects all the possible plays it can make
             print("player " + str(first + 1) + "'s turn:")
-            leadCard = self.playerList[first].playOption(options, cardList, trump, len(self.playerList)) #lead player chooses a play from its options
+            leadCard = self.playerList[first].playOption(options, cardList, trump, len(self.playerList), bids, scores) #lead player chooses a play from its options
             print(leadCard)
             cardList.append(leadCard) #lead card is added to the trick
             for i in range(first + 1 , first + len(self.playerList)): #iterate over remaining players choices in order ascending from first player
                 options = self.playerList[i % len(self.playerList)].getOptions(leadCard.getSuit()) #player collects all the possible plays it can make
                 print("player " + str((i % len(self.playerList)) + 1) + "'s turn:")
-                card = self.playerList[i % len(self.playerList)].playOption(options, cardList, trump, len(self.playerList)) #player chooses a play from its options
+                card = self.playerList[i % len(self.playerList)].playOption(options, cardList, trump, len(self.playerList), bids, scores) #player chooses a play from its options
                 print(card)
                 cardList.append(card) #card played added to list
+            for player in self.playerList:
+                player.updateCardsInDeck(cardList)
             self.displayCards.append(cardList) #save cards in the trick to be displayed
             first = self.trick(trump, first, cardList, len(self.playerList)) #trick winner decided, index of the player who won is returned
             self.currentLead.append(first)
@@ -124,7 +132,8 @@ class Game:
         for player in self.playerList: #awards bonus points to any player who matched their bid at the end of the round
             player.addHandHistory([])
             if player.getRoundScore() == player.getBid():
-                player.addScore(10 + player.getRoundScore())
+                player.addRoundScore(10)
+                player.addScore(player.getRoundScore())
                 player.updateBidsMade()
             else:
                 player.addScore(player.getRoundScore())

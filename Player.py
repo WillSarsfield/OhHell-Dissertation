@@ -37,7 +37,6 @@ class Player:
     
     def addScore(self, x):
         self.score += x
-        self.roundScore = 0
 
     def addRoundScore(self, x):
         self.roundScore += x
@@ -50,6 +49,9 @@ class Player:
 
     def updateBidsMade(self):
         self.bidsMade += 1
+    
+    def updateCardsInDeck(self, cards):
+        pass
 
     def addHandHistory(self, cards):
         self.handHistory.append(cards)
@@ -74,7 +76,7 @@ class Player:
             options = self.hand.getCards()
         return options
     
-    def playOption(self, options, cardsPlayed, trump, players): #picks a random card out of the options, removes it from hand, and returns it
+    def playOption(self, options, cardsPlayed, trump, players, bids, scores): #picks a random card out of the options, removes it from hand, and returns it
         rnd = random.randrange(0, len(options))
         card = options[rnd]
         self.hand.remove(card)
