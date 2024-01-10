@@ -167,12 +167,6 @@ class InformedPlayer(Player):
         bid = ban
         while bid == ban:
             bid = 0
-            npWinProbs = np.array([self.getWinningProbability(card, None, lead, trump) for card in self.hand.getCards()])
-            #print(npWinProbs)
-            # for card in self.hand.getCards():
-            #     print(card, end = " ")
-            # print()
-            # print(np.mean(npWinProbs))
             for card in self.hand.getCards():
                 if self.getWinningProbability(card, None, lead, trump) > 0.5:
                     bid += 1

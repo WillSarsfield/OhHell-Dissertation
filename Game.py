@@ -25,9 +25,9 @@ class Game:
             if playersStrength[i] == 0:
                 player = Player("player " + str(i+1))#make players with names
             elif playersStrength[i] == 1:
-                player = InformedPlayer("player " + str(i+1), optimisations)#make players with names
+                player = InformedPlayer("player " + str(i+1), optimisations)#make informed players with names
             elif playersStrength[i] == 2:
-                player = BestAgent(f"player {i+1}")
+                player = BestAgent(f"player {i+1}") #make best agents with names
 
             self.playerList.append(player)#add to list of players
         for i in range(0, rounds):#run round function rounds times

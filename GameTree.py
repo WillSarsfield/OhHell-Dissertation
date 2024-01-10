@@ -4,10 +4,11 @@ import time
 import numpy as np
 import copy
 from collections import defaultdict
+import ete3
 
 class GameTree:
 
-    def __init__(self, parent = None, hands = [], cards_played = [], scores = [], bids = None, players = None, trump = None, current_player = 0, initial_player = 0, max_depth = None, depth = 0) -> None:
+    def __init__(self, parent = None, hands = [], cards_played = [], scores = [], bids = None, players = None, trump = None, current_player = 0, max_depth = None, depth = 0) -> None:
         self.parent = parent
         self.children = []
         self.hands = hands # cards player has 
@@ -17,7 +18,6 @@ class GameTree:
         self.players = players # number of players
         self.trump = trump # trump suit for the round
         self.i = current_player # player whose turn it currently is
-        self.initial_player = initial_player # player who we're building the tree for
         self.max_depth = max_depth
         self.depth = depth
         self.visits = 0 # times node was visited
@@ -91,7 +91,7 @@ class GameTree:
             return self
         
         if self.unprocessed_choices:
-            new_choice = self.unprocessed_choices.pop(0)
+            new_choice = self.unprocessed_choices.pop(random.randint(0,len(self.unprocessed_choices) -1))
         else:
             return self
 
@@ -107,18 +107,29 @@ class GameTree:
         next_player +=1
         if next_player == self.players:
             next_player = 0
-        cards_played = copy.deepcopy(self.cards_played)
+        if len(self.cards_played) == self.players:
+            cards_played = []
+        else:
+            cards_played = copy.deepcopy(self.cards_played)
+        cards_played.append(new_choice)
         if len(cards_played) == self.players:
             for i, card1 in enumerate(cards_played):
+                # Assume player i has won until proven otherwise
+                player_wins = True        
                 for card2 in cards_played:
+                    if card1.equalTo(card2):
+                        continue
                     if not card1.beats(card2, cards_played[0].getSuit(), self.trump):
+                        # Card1 does not beat card2, set player_wins to False and break the inner loop
+                        player_wins = False
                         break
-                next_player = i
-                new_scores[i] += 1
-                
-            cards_played = []
-        cards_played.append(new_choice)
-        child = GameTree(self, new_hands, cards_played, new_scores, self.bids, self.players, self.trump, next_player, self.initial_player, self.max_depth, self.depth + 1)
+                if player_wins:
+                    # All comparisons passed, player i wins
+                    next_player = (next_player + i) % 4
+                    new_scores[next_player] += 1
+                    break
+        
+        child = GameTree(self, new_hands, cards_played, new_scores, self.bids, self.players, self.trump, next_player, self.max_depth, self.depth + 1)
         self.children.append(child)
         return child
 
@@ -135,18 +146,19 @@ class GameTree:
     def simulate_random_playout(self, hands, scores, player, cards_played):
         """Simulation of random moves from the current cards"""
         while True: # until there are no more random moves to make, keep making random moves
-            if len(cards_played) == self.players or not cards_played: # get player choices
+            if not cards_played: # get player choices
                 choices = hands[player]
-                cards_played = []
             else:
-                choices = self.get_choices(hands[player], self.cards_played[0])
+                choices = self.get_choices(hands[player], cards_played[0])
             if not choices: # if no choices left then round is over
                 return self.evaluate(scores) # return the evaluation of the final state
             if type(choices) is not list:
                 choices = [choices]
             choice = random.choice(choices) # pick random choice
             hands[player] = [card for card in hands[player] if not card.equalTo(choice)] # remove choice from players hand
-            cards_played.append(choice)
+            if len(cards_played) == self.players:
+                cards_played = []
+            cards_played.append(choice) # add choice to cards played
             player += 1
             if player == self.players:
                 player = 0
@@ -165,16 +177,14 @@ class GameTree:
                         # All comparisons passed, player i wins
                         player = (player + i) % 4
                         scores[player] += 1
-                cards_played = []
+                        break
 
     def evaluate(self, scores):
-        if self.bids:
-            if self.bids[self.i] == scores[self.i]:
-                return scores[self.initial_player] + 10
-            else:
-                return scores[self.initial_player]
-        else:
-            return scores[self.initial_player]
+        if self.bids: # if not in the bidding phase
+            for i in range(4): # if player i made their bid award bonus points
+                if self.bids[i] == scores[i]:
+                    scores[self.i] += 10
+        return scores
 
         
     def backpropagate(self, result):
@@ -182,7 +192,7 @@ class GameTree:
         current_node = self
         while current_node.parent:
             current_node.visits += 1
-            current_node.wins += result
+            current_node.wins += result[current_node.parent.i] # wins of the node should reflect parent's choice
             current_node = current_node.parent
         return current_node
 
@@ -204,9 +214,10 @@ class GameTree:
             else:
                 line_symbol = "├── "
             output += f"{indentation}{line_symbol}"
-        output += f"depth={self.depth}, wins={self.wins}, visits={self.visits}, children = {len(self.children)}\n"
+        output += f"depth={self.depth} | wins={self.wins} | visits={self.visits} | children={len(self.children)} | player={self.i + 1} | scores={self.scores}\n"
         # output += f"{indentation}├hand = {hand_as_string(self.hands[self.i])}\n"
-        output += f"{indentation}├choices = {hand_as_string(self.choices)}\n"
+        output += f"{indentation}├cards_played = {hand_as_string(self.cards_played)}\n"
+        # output += f"{indentation}├choices = {hand_as_string(self.choices)}\n"
         
         # for hand in self.other_players_hands:
         #     output += f"{indentation}├next_hand = {hand_as_string(hand)}\n"

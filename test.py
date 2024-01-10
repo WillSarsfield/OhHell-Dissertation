@@ -2,6 +2,7 @@ from Game import Game
 
 rounds = 13
 players = 4
-playerStrengths = [2,0,0,0]
-
-game = Game(rounds, players, playerStrengths)
+playerStrengths = [2,1,1,1]
+optimisations =  [0.285903516922823, 0.1343298885883228, 0.2513171910666505, 0.2654805206104466, 0.06296888281175703, 0.19781578320406684, 0.40322548219933846, 0.1057952046865951, 0.29316352990999955, 0.24951563665051385, 0.25987660163497556, 0.23694603672039563, 0.25366172499411493]
+    
+game = Game(rounds, players, playerStrengths, optimisations=optimisations)

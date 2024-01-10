@@ -21,7 +21,7 @@ class BestAgent(Player):
             choice = options[0]
             self.hand.remove(choice)
             return choice
-        time_limit = 5
+        time_limit = 10
         time_start = time.time()
         iterations = 1000
         wins = [0 for _ in options]
@@ -38,9 +38,11 @@ class BestAgent(Player):
                 expansion.backpropagate(simulated_value)
             for x, child in enumerate(game_tree.children):
                 wins[x] += child.wins/child.visits
-        for win in wins:
-            print(win/samples, end = " ")
-        print()
+        print(self.cardsInDeck)
+        print(f"Scores: {scores}")
+        for i, win in enumerate(wins):
+            print(f"({options[i]}: {win/samples})", end = " ")
+        print(f"\nSamples: {samples}")
         choice = options[wins.index(max(wins))]
         self.hand.remove(choice)
         return choice
@@ -71,11 +73,15 @@ class BestAgent(Player):
         npbids = np.array(bids)
         if len(bids) == players - 1:
             if np.sum(npbids) > handSize: # if over bid round down
-                bid = math.floor(bid)
-            else:
-                bid = math.ceil(bid)
+                if math.floor(bid) == ban: #if rounding down hits the ban, round up
+                    bid = math.ceil(bid)
+                else:
+                    bid = math.floor(bid)
+            else: # if under bid
+                if math.ceil(bid) == ban: #if rounding up hits the ban, round down
+                    bid = math.floor(bid)
+                else:
+                    bid = math.ceil(bid)
         else:
             bid = round(bid)
-        if bid == ban:
-            bid += 1
         self.bid = bid
