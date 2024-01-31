@@ -4,11 +4,10 @@ import time
 import numpy as np
 import copy
 from collections import defaultdict
-import ete3
 
 class GameTree:
 
-    def __init__(self, parent = None, hands = [], cards_played = [], scores = [], bids = None, players = None, trump = None, current_player = 0, max_depth = None, depth = 0) -> None:
+    def __init__(self, parent = None, hands = [], card_choice = None, cards_played = [], scores = [], bids = None, players = None, trump = None, current_player = 0, max_depth = None, depth = 0) -> None:
         self.parent = parent
         self.children = []
         self.hands = hands # cards player has 
@@ -23,6 +22,8 @@ class GameTree:
         self.visits = 0 # times node was visited
         self.wins = 0 # score of node
         self.choices = []
+        self.terminate = False
+        self.card_choice = card_choice
         if len(self.cards_played) == self.players or not self.cards_played:
             self.choices = self.hands[self.i]
         else:
@@ -58,10 +59,13 @@ class GameTree:
             for card in random_hand:
                 unseen.removeCard(card)
 
-    def select_child(self, exploration_weight=1.4):
+    def select_child(self, exploration_weight=1.4, threshold = 1000):
         """Select a child node using UCT (Upper Confidence Bound for Trees) formula"""
         # if no children, select itself
         if not self.children:
+            return self
+        if self.visits > threshold:
+            self.terminate = True
             return self
         log_total_visits = 0
         for child in self.children:
@@ -79,6 +83,8 @@ class GameTree:
 
         # Choose the child with the maximum UCT value
         child_max = max(self.children, key=uct_value)
+        if self.unprocessed_choices:
+            return self
         if child_max.children:
             child_max = child_max.select_child()
         return child_max
@@ -91,10 +97,9 @@ class GameTree:
             return self
         
         if self.unprocessed_choices:
-            new_choice = self.unprocessed_choices.pop(random.randint(0,len(self.unprocessed_choices) -1))
+            new_choice = self.unprocessed_choices.pop(0) # process in order so they can be easily indexed by the choosing agent
         else:
             return self
-
         new_hands = copy.deepcopy(self.hands)
         new_scores = copy.deepcopy(self.scores)
         next_player = copy.deepcopy(self.i)
@@ -129,7 +134,7 @@ class GameTree:
                     new_scores[next_player] += 1
                     break
         
-        child = GameTree(self, new_hands, cards_played, new_scores, self.bids, self.players, self.trump, next_player, self.max_depth, self.depth + 1)
+        child = GameTree(self, new_hands, new_choice, cards_played, new_scores, self.bids, self.players, self.trump, next_player, self.max_depth, self.depth + 1)
         self.children.append(child)
         return child
 
@@ -214,9 +219,15 @@ class GameTree:
             else:
                 line_symbol = "├── "
             output += f"{indentation}{line_symbol}"
-        output += f"depth={self.depth} | wins={self.wins} | visits={self.visits} | children={len(self.children)} | player={self.i + 1} | scores={self.scores}\n"
+        #output += f"depth={self.depth} | wins={self.wins} | visits={self.visits} | children={len(self.children)} | player={self.i + 1} | scores={self.scores}\n"
         # output += f"{indentation}├hand = {hand_as_string(self.hands[self.i])}\n"
-        output += f"{indentation}├cards_played = {hand_as_string(self.cards_played)}\n"
+        if self.parent:
+            if self.visits != 0:
+                output += f"player {self.parent.i + 1} plays card {self.card_choice} = {self.wins/self.visits}\n"
+            else:
+                output += f"player {self.parent.i + 1} plays card {self.card_choice} = 0\n"
+        else:
+            output += f"--root--\n"
         # output += f"{indentation}├choices = {hand_as_string(self.choices)}\n"
         
         # for hand in self.other_players_hands:

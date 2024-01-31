@@ -5,6 +5,7 @@ import numpy as np
 import random
 import math
 import time
+from scipy import stats
 
 class BestAgent(Player):
     
@@ -21,27 +22,40 @@ class BestAgent(Player):
             choice = options[0]
             self.hand.remove(choice)
             return choice
-        time_limit = 10
+        time_limit = 20
         time_start = time.time()
-        iterations = 1000
+        iterations = 5000
         wins = [0 for _ in options]
         samples = 0
+        win_count = 0
         while time.time() - time_start < time_limit:
+            winner_index = 0
             samples += 1
             # make game tree
             game_tree = GameTree(parent = None, hands = [self.hand.getCards()], cards_played=cardsPlayed, players = players, bids = bids, scores = scores, trump=trump, max_depth=12)
             game_tree.determinize(self.cardsInDeck)
             for _ in range(iterations):
                 selection = game_tree.select_child()
+                if selection.terminate:
+                    break
                 expansion = selection.expand()
                 simulated_value = expansion.simulate()
                 expansion.backpropagate(simulated_value)
             for x, child in enumerate(game_tree.children):
                 wins[x] += child.wins/child.visits
-        print(self.cardsInDeck)
+            #     print(f"{child.card_choice} = {round(wins[x]/samples, 3)}", end = "")
+            #     if x == 7:
+            #         print()
+            # print()
+            if wins.index(max(wins)) != winner_index:
+                win_count = 0
+                winner_index = wins.index(max(wins))
+            else:
+                win_count += 1
+                if win_count > 9:
+                    print(f"{options[wins.index(max(wins))]} has been the best for 10 determinizations")
+                    break
         print(f"Scores: {scores}")
-        for i, win in enumerate(wins):
-            print(f"({options[i]}: {win/samples})", end = " ")
         print(f"\nSamples: {samples}")
         choice = options[wins.index(max(wins))]
         self.hand.remove(choice)
@@ -50,26 +64,36 @@ class BestAgent(Player):
     def playBid(self, ban, handSize, trump, lead, players, bids):
         self.cardsInDeck = Deck()
         self.updateCardsInDeck(self.hand.getCards())
-        samples = 30
-        iterations = 1000
+        time_limit = 20
+        time_start = time.time()
+        iterations = 5000
         wins = np.zeros(handSize)
         scores = [0 for _ in range(players)]
-        for i in range(samples):
+        samples = 0
+        while time.time() - time_start < time_limit:
+            samples += 1
             # make game tree
             game_tree = GameTree(parent = None, hands = [self.hand.getCards()], scores=scores, players = players, trump=trump, max_depth=12)
             game_tree.determinize(self.cardsInDeck)
             for j in range(iterations):
                 selection = game_tree.select_child()
+                if selection.terminate:
+                    break
                 expansion = selection.expand()
                 simulated_value = expansion.simulate()
                 expansion.backpropagate(simulated_value)
             for x, child in enumerate(game_tree.children): # gets average score over cards from random playouts
                 wins[x] += child.wins/child.visits
-        if lead: # can choose so should choose highest expected score
-            bid = np.max(wins)/samples
-        else: # can't choose so finds the average expected score
-            bid = np.mean(wins)/samples
-        print(bid)
+            #     print(f"{child.card_choice} = {round((child.wins/child.visits)/samples, 3)} ", end = " ")
+            #     if x == 7:
+            #         print()
+            # print()
+            # for x, child in enumerate(game_tree.children): # gets average score over cards from random playouts
+            #     print(f"{child.card_choice} = {round((wins[x])/samples, 3)} ", end = " ")
+            #     if x == 7:
+            #         print()
+            # print()
+        bid = np.mean(wins)/samples
         npbids = np.array(bids)
         if len(bids) == players - 1:
             if np.sum(npbids) > handSize: # if over bid round down
@@ -84,4 +108,5 @@ class BestAgent(Player):
                     bid = math.ceil(bid)
         else:
             bid = round(bid)
+        print(bid)
         self.bid = bid
