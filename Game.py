@@ -10,10 +10,13 @@ import sys, os
 #Game class that when called plays the number of rounds specified
 
 class Game:
-    def __init__(self, rounds, players, playersStrength, verbose=True, optimisations = [], best_weights=[]) -> None:
+    def __init__(self, rounds, players, playersStrength, handSize = None, verbose=True, optimisations = [], best_weights=[]) -> None:
         self.players = players #number of players
         self.playerList = []
-        self.handSize = math.floor(52/players)
+        if handSize:
+            self.handSize = handSize
+        else:
+            self.handSize = math.floor(52/players)
         self.displayCards = []
         self.winningCards = []
         self.currentLead = []
@@ -78,6 +81,8 @@ class Game:
         bidTotal = 0
         bids = []
         for i in range(first , first + len(self.playerList)):
+            if deck.cardList: #update cards not used in the round, consistent for each player
+                self.playerList[i % len(self.playerList)].resetCardsInDeck(deck.cardList)
             if (i % len(self.playerList)) != len(self.playerList) - 1:
                 if i == first:
                     self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize, trump, True, len(self.playerList), bids) #can make bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
@@ -87,7 +92,7 @@ class Game:
                 print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
                 bids.append(self.playerList[i % len(self.playerList)].getBid())
             else:
-                if bidTotal < 14: #calculates the bid that is banned for the final player
+                if bidTotal < handSize + 1: #calculates the bid that is banned for the final player
                     self.playerList[i % len(self.playerList)].playBid(handSize - bidTotal, handSize, trump, False, len(self.playerList), bids)
                 else:
                     self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize, trump, False, len(self.playerList), bids)

@@ -9,8 +9,15 @@ class InformedPlayer(Player):
         super().__init__(name)
         self.cardsInDeck = Deck()
         self.optimisations = optimisations
+
+    def resetCardsInDeck(self, cards):
+        self.cardsInDeck = Deck()
+        for card in cards:
+            self.cardsInDeck.removeCard(card)
         
     def updateCardsInDeck(self, cards):
+        if not self.cardsInDeck.cardList:
+            self.cardsInDeck = Deck()
         for card in cards:
             self.cardsInDeck.removeCard(card)
 
@@ -162,7 +169,6 @@ class InformedPlayer(Player):
         return [option for option in options if option not in winningOptions]
 
     def playBid(self, ban, handSize, trump, lead, players, bids):
-        self.cardsInDeck = Deck()
         self.updateCardsInDeck(self.hand.getCards())
         bid = ban
         while bid == ban:

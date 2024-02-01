@@ -53,6 +53,9 @@ class Player:
     def updateCardsInDeck(self, cards):
         pass
 
+    def resetCardsInDeck(self, cards):
+        pass
+
     def addHandHistory(self, cards):
         self.handHistory.append(cards)
     

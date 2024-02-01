@@ -1,8 +1,41 @@
-from Game import Game
+from GameTree import GameTree
+from Deck import Deck
 
-rounds = 13
-players = 4
-playerStrengths = [2,1,1,1]
-optimisations =  [0.285903516922823, 0.1343298885883228, 0.2513171910666505, 0.2654805206104466, 0.06296888281175703, 0.19781578320406684, 0.40322548219933846, 0.1057952046865951, 0.29316352990999955, 0.24951563665051385, 0.25987660163497556, 0.23694603672039563, 0.25366172499411493]
-    
-game = Game(rounds, players, playerStrengths, optimisations=optimisations)
+deck1 = Deck()
+deck1.shuffle()
+hands = []
+unseen = []
+for i in range (0,4):
+    hands.append(deck1.makeHand(4))
+    if i > 0:
+        unseen.append(hands[i])
+
+unseen = [card for hand in unseen for card in hand]
+deck1.cardList = unseen
+for i, hand in enumerate(hands):
+    print(f"Player {i+1}: ", end = " ")
+    for card in hand:
+        print(card, end = " ")
+    print()
+
+for card in unseen:
+    print(card, end= " ")
+print()
+iterations = 1000
+samples = 10
+for j in range(samples):
+    game_tree = GameTree(parent = None, hands = [hands[0]], scores=[0,0,0,0], bids=[1,1,1,0], players = 4, trump=0, max_depth=12)
+    game_tree.determinize(deck1)
+    for i, hand in enumerate(game_tree.hands):
+        print(f"Player: {i+1}", end=" ")
+        for card in hand:
+            print(card, end= " ")
+        print()
+    for i in range(iterations):
+        selection = game_tree.select_child(4-(3*(i/iterations)**2))
+        if selection.terminate:
+            break
+        expansion = selection.expand()
+        simulated_value = expansion.simulate()
+        expansion.backpropagate(simulated_value)
+    print(game_tree.__str__(1))

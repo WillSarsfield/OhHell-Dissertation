@@ -11,8 +11,16 @@ class BestAgent(Player):
     
     def __init__(self, name):
         super().__init__(name)
-        
+        self.cardsInDeck = Deck()
+    
+    def resetCardsInDeck(self, cards):
+        self.cardsInDeck = Deck()
+        for card in cards:
+            self.cardsInDeck.removeCard(card)
+
     def updateCardsInDeck(self, cards):
+        if not self.cardsInDeck.cardList:
+            self.cardsInDeck = Deck()
         for card in cards:
             self.cardsInDeck.removeCard(card)
 
@@ -22,7 +30,7 @@ class BestAgent(Player):
             choice = options[0]
             self.hand.remove(choice)
             return choice
-        time_limit = 20
+        time_limit = 10
         time_start = time.time()
         iterations = 5000
         wins = [0 for _ in options]
@@ -62,14 +70,16 @@ class BestAgent(Player):
         return choice
 
     def playBid(self, ban, handSize, trump, lead, players, bids):
-        self.cardsInDeck = Deck()
+        current_bid = 0
         self.updateCardsInDeck(self.hand.getCards())
-        time_limit = 20
+        print(self.cardsInDeck)
+        time_limit = 10
         time_start = time.time()
         iterations = 5000
         wins = np.zeros(handSize)
         scores = [0 for _ in range(players)]
         samples = 0
+        bid_count = 0
         while time.time() - time_start < time_limit:
             samples += 1
             # make game tree
@@ -84,6 +94,15 @@ class BestAgent(Player):
                 expansion.backpropagate(simulated_value)
             for x, child in enumerate(game_tree.children): # gets average score over cards from random playouts
                 wins[x] += child.wins/child.visits
+            bid = np.mean(wins)/samples
+            if round(bid) == round(current_bid):
+                bid_count+=1
+                if bid_count > 9:
+                    print(f"{round(bid)} has been the same bid for 10 determinizations")
+                    break
+            else:
+                bid_count = 0
+            current_bid = bid
             #     print(f"{child.card_choice} = {round((child.wins/child.visits)/samples, 3)} ", end = " ")
             #     if x == 7:
             #         print()

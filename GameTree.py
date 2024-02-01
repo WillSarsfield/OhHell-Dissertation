@@ -59,17 +59,17 @@ class GameTree:
             for card in random_hand:
                 unseen.removeCard(card)
 
-    def select_child(self, exploration_weight=1.4, threshold = 1000):
+    def select_child(self, exploration_weight=2, threshold = 1000):
         """Select a child node using UCT (Upper Confidence Bound for Trees) formula"""
         # if no children, select itself
         if not self.children:
             return self
-        if self.visits > threshold:
-            self.terminate = True
-            return self
         log_total_visits = 0
         for child in self.children:
             log_total_visits += child.visits
+        if self.visits > threshold:
+                self.terminate = True
+                return self
         log_total_visits = math.log(log_total_visits)
         # if all choices do not have a node, select itself
         if len(self.children) < len(self.choices):
@@ -160,6 +160,7 @@ class GameTree:
             if type(choices) is not list:
                 choices = [choices]
             choice = random.choice(choices) # pick random choice
+            # print(f"player {player + 1}: {choice}")
             hands[player] = [card for card in hands[player] if not card.equalTo(choice)] # remove choice from players hand
             if len(cards_played) == self.players:
                 cards_played = []
@@ -223,7 +224,7 @@ class GameTree:
         # output += f"{indentation}├hand = {hand_as_string(self.hands[self.i])}\n"
         if self.parent:
             if self.visits != 0:
-                output += f"player {self.parent.i + 1} plays card {self.card_choice} = {self.wins/self.visits}\n"
+                output += f"player {self.parent.i + 1} plays card {self.card_choice} = {self.wins}, {self.visits}\n"
             else:
                 output += f"player {self.parent.i + 1} plays card {self.card_choice} = 0\n"
         else:
