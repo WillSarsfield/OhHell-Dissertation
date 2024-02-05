@@ -27,7 +27,9 @@ class Hand:#class that stores a players hand
         return self.cardList.pop(0)
     
     def remove(self, card):
-        self.cardList.remove(card)
+        for c in self.cardList:
+            if c.getValue() == card.getValue() and c.getSuit() == card.getSuit():
+                self.cardList.remove(c)
     
     def __str__(self):
         string = ""

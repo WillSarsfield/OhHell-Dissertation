@@ -200,12 +200,12 @@ class GameInterface(tk.Tk):
         self.score_label = tk.Label(self.score_frame, text = f"Scores: ", font = ("Terminal", 18))
         self.score_label.grid(row=0,column=0)
         for i, player in enumerate(self.playerList):
-            self.player_score_label = tk.Label(self.score_frame, text = f"{player.getName()}: {player.getScore()}", font = ("Terminal", 12))
+            self.player_score_label = tk.Label(self.score_frame, text = f"{player.getScore()} + {player.getRoundScore()}", font = ("Terminal", 12))
             self.player_score_label.grid(row = i+1, column = 0)
         # playing table
         self.table_frame = tk.Frame(self, bd= 2, relief=tk.SUNKEN)
         self.table_frame.place(x = 200, y = 175, relwidth=0.4, relheight=0.4)
-        # winner card
+        # winning card
         self.winner_frame = tk.Frame(self, bd= 2, relief=tk.SUNKEN)
         self.winner_frame.place(x = 200, y = 365, relwidth=0.4, relheight=0.125)
         # hand
@@ -229,7 +229,10 @@ class GameInterface(tk.Tk):
         self.bids = []
         self.save_index = 0
         self.save_first = first
+        for player in self.playerList:
+            player.bid = 0
         for i in range(first , first + len(self.playerList)):
+            self.playerList[i % len(self.playerList)].resetCardsInDeck(self.deck.cardList)
             if i % len(self.playerList) == 0:
                 self.save_index = i + 1
                 self.get_bid()
@@ -249,6 +252,7 @@ class GameInterface(tk.Tk):
                     self.playerList[i % len(self.playerList)].playBid(self.hand_size + 1, self.hand_size, self.trump, False, len(self.playerList), self.bids)
                 print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
                 self.bids.append(self.playerList[i % len(self.playerList)].getBid())
+            self.update_bid_board()
 
     def get_bid(self):
         self.bid_options = []
@@ -279,6 +283,7 @@ class GameInterface(tk.Tk):
 
     def submit_bid(self):
         print(f"player 1 bid: {self.playerList[0].getBid()}")
+        self.bids.append(self.playerList[0].getBid())
         self.table_frame.destroy()
         self.table_frame = tk.Frame(self, bd= 2, relief=tk.SUNKEN)
         self.table_frame.place(x = 200, y = 175, relwidth=0.4, relheight=0.4)
@@ -303,46 +308,62 @@ class GameInterface(tk.Tk):
                         self.playerList[i % len(self.playerList)].playBid(self.hand_size + 1, self.hand_size, self.trump, False, len(self.playerList), self.bids)
                     print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
                     self.bids.append(self.playerList[i % len(self.playerList)].getBid())
+                self.update_bid_board()
         self.update_bid_board()
-        self.play_trick(self.hand_size)
-        self.update_hand(-1)
+        self.update_hand(-1, False)
+        self.remaining_tricks = self.hand_size
+        self.play_trick()
 
-    def play_trick(self, remaining):
-        if remaining == 0:
+    def play_trick(self):
+        if self.remaining_tricks == 0:
+            self.winner_card = None
+            self.winner_frame.destroy()
+            self.cardList = [] #cardlist the trick will be passed into
+            self.update_table()
             self.trump += 1
             self.trump = self.trump % 4
             self.update_trump()
             self.round_count += 1
             if self.round_count > self.rounds:
+                self.end()
                 return
             self.update_round()
             self.play_round((self.round_count - 1) % self.players)
-        self.cardList = [] #cardlist the trick will be passed into
-        self.scores = [0 for _ in range(len(self.playerList))]
-        for j, player in enumerate(self.playerList):#save hand in history for display later
-            self.scores[j] = player.getRoundScore()
-        if self.save_first == 0:
-            self.save_index = 1
-            return
-        print("first = " + str(self.save_first + 1))
-        options = self.playerList[self.save_first].getOptions() #lead player collects all the possible plays it can make
-        print("player " + str(self.save_first + 1) + "'s turn:")
-        self.leadCard = self.playerList[self.save_first].playOption(options, self.cardList, self.trump, len(self.playerList), self.bids, self.scores) #lead player chooses a play from its options
-        print(self.leadCard)
-        self.cardList.append(self.leadCard) #lead card is added to the trick
-        self.update_table()
-        for i in range(self.save_first + 1 , self.save_first + len(self.playerList)): #iterate over remaining players choices in order ascending from first player
-            if i % self.players == 0:
-                self.save_index = i + 1
-                return
-            options = self.playerList[i % len(self.playerList)].getOptions(self.leadCard.getSuit()) #player collects all the possible plays it can make
-            print("player " + str((i % len(self.playerList)) + 1) + "'s turn:")
-            card = self.playerList[i % len(self.playerList)].playOption(options, self.cardList, self.trump, len(self.playerList), self.bids, self.scores) #player chooses a play from its options
-            print(card)
-            self.cardList.append(card) #card played added to list
+        else:
+            self.winner_card = None
+            self.remaining_tricks -= 1
+            self.winner_frame.destroy()
+            self.cardList = [] #cardlist the trick will be passed into
             self.update_table()
-        for player in self.playerList:
-            player.updateCardsInDeck(self.cardList)
+            self.scores = [0 for _ in range(len(self.playerList))]
+            for j, player in enumerate(self.playerList):#save hand in history for display later
+                self.scores[j] = player.getRoundScore()
+            if self.save_first == 0:
+                print("first = " + str(self.save_first + 1))
+                print("player " + str(self.save_first + 1) + "'s turn:")
+                self.update_hand(-1, True)
+                self.save_index = 1
+                return
+            print("first = " + str(self.save_first + 1))
+            options = self.playerList[self.save_first].getOptions() #lead player collects all the possible plays it can make
+            print("player " + str(self.save_first + 1) + "'s turn:")
+            self.leadCard = self.playerList[self.save_first].playOption(options, self.cardList, self.trump, len(self.playerList), self.bids, self.scores) #lead player chooses a play from its options
+            print(self.leadCard)
+            self.cardList.append(self.leadCard) #lead card is added to the trick
+            self.update_table()
+            for i in range(self.save_first + 1 , self.save_first + len(self.playerList)): #iterate over remaining players choices in order ascending from first player
+                if i % self.players == 0:
+                    self.update_hand(self.leadCard.getSuit(), True)
+                    self.save_index = i + 1
+                    return
+                options = self.playerList[i % len(self.playerList)].getOptions(self.leadCard.getSuit()) #player collects all the possible plays it can make
+                print("player " + str((i % len(self.playerList)) + 1) + "'s turn:")
+                card = self.playerList[i % len(self.playerList)].playOption(options, self.cardList, self.trump, len(self.playerList), self.bids, self.scores) #player chooses a play from its options
+                print(card)
+                self.cardList.append(card) #card played added to list
+                self.update_table()
+            for player in self.playerList:
+                player.updateCardsInDeck(self.cardList)
 
     def show_card(self, frame, card_val, card_suit, i, option):
         current_card = Card(card_val, card_suit)
@@ -359,9 +380,11 @@ class GameInterface(tk.Tk):
 
     def play_card(self, card):
         print(card)
+        self.playerList[0].playOption(card)
+        self.update_hand(-1, False)
         if not self.cardList:
             self.leadCard = card
-        if self.save_index % 4 == 1:
+        if self.save_index % self.players == 1:
             self.cardList.append(card)
             self.update_table()
             for i in range(self.save_index , self.save_first + len(self.playerList)): #iterate over remaining players choices in order ascending from first player
@@ -374,22 +397,48 @@ class GameInterface(tk.Tk):
                 print(card)
                 self.cardList.append(card) #card played added to list
                 self.update_table()
-            for player in self.playerList:
-                player.updateCardsInDeck(self.cardList)
+                for player in self.playerList:
+                    player.updateCardsInDeck(self.cardList)
+            self.save_first = self.trick()
+            self.playerList[self.save_first].addRoundScore(1) #update winning player's score
+            if self.remaining_tricks == 0:
+                for player in self.playerList: #awards bonus points to any player who matched their bid at the end of the round
+                    if player.getRoundScore() == player.getBid():
+                        player.addRoundScore(10)
+                        player.addScore(player.getRoundScore())
+                        player.updateBidsMade()
+                    else:
+                        player.addScore(player.getRoundScore())
+                    player.roundScore = 0
+            self.update_winner_frame()
+            self.update_score_board()
 
-    def get_winner(self): # find winner from trick to set to the new first, update scores, update displays, make an okay button on the winner frame
-        pass
 
+    # find winner from trick to set to the new first, update scores, update displays, make an okay button on the winner frame
+    
+    def trick(self):
+        winner = self.save_first #winner is set as the first player to start
+        self.winner_card = self.cardList[0]
+        leadSuit = self.winner_card.getSuit()
+        i = 0 #count needed to format player turns correctly
+        for card in self.cardList:
+            if card.beats(self.winner_card, leadSuit, self.trump):
+                winner = (self.save_first + i) % self.players #set winner to current index of card played
+                self.winner_card = card   
+            i += 1
+        print("Card that won:")
+        print(self.winner_card)
+        return winner #return the index of the player that won
     
     def update_round(self): # update round the game is on out of total rounds
         self.round_label.destroy()
         self.round_label = tk.Label(self, text=f"Round: {self.round_count}/{self.rounds}", font = ("Terminal", 20))
-        self.round_label.place(x = 20, y = 20, relwidth=0.3, relheight=0.1)
+        self.round_label.place(x = 10, y = 20, relwidth=0.25, relheight=0.05)
 
     def update_trump(self): # update trump suit for that round
         self.trump_label.destroy()
         self.trump_label = tk.Label(self, text=f"Trump: {self.suitDict[self.trump]}", font = ("Terminal", 20))
-        self.trump_label.place(x = 20, y = 20, relwidth=0.3, relheight=0.1)
+        self.trump_label.place(x = 180, y = 20, relwidth=0.2, relheight=0.05)
 
     def update_score_board(self): # update score board frame
         self.score_frame.destroy()
@@ -398,7 +447,7 @@ class GameInterface(tk.Tk):
         self.score_label = tk.Label(self.score_frame, text = f"Scores: ", font = ("Terminal", 18))
         self.score_label.grid(row=0,column=0)
         for i, player in enumerate(self.playerList):
-            self.player_score_label = tk.Label(self.score_frame, text = f"{player.getName()}: {player.getScore()}", font = ("Terminal", 12))
+            self.player_score_label = tk.Label(self.score_frame, text = f"{player.getScore()} + {player.getRoundScore()}", font = ("Terminal", 12))
             self.player_score_label.grid(row = i+1, column = 0)
 
     def update_bid_board(self): # update bid board frame
@@ -419,20 +468,39 @@ class GameInterface(tk.Tk):
             self.show_card(self.table_frame, card.getValue(), card.getSuit(), i, False)
 
     def update_winner_frame(self): # update the frame showing who won the trick
-        pass
+        self.winner_frame = tk.Frame(self, bd= 2, relief=tk.SUNKEN)
+        self.winner_frame.place(x = 200, y = 365, relwidth=0.4, relheight=0.125)
+        self.winner_label = tk.Label(self.winner_frame, text = f"Winner: player {self.save_first + 1}", font = ("Terminal", 12))
+        self.winner_label.grid(row = 0, column = 0)
+        self.show_card(self.winner_frame, self.winner_card.getValue(), self.winner_card.getSuit(), 7, False)
+        self.winner_button = tk.Button(self.winner_frame, text = "OK", font = ("Terminal", 12), command=self.play_trick)
+        self.winner_button.grid(row = 1, column = 1)
 
-    def update_hand(self, lead): # update cards in player's hand
+
+    def update_hand(self, lead, choose): # update cards in player's hand
         self.hand_frame.destroy()
         self.hand_frame = tk.Frame(self, bd= 2, relief=tk.SUNKEN)
         self.hand_frame.place(x = 110, y = 485, relwidth=0.7, relheight=0.25)
         card_options = Deck()
         card_options.cardList = self.playerList[0].getOptions(lead)
-        print(card_options)
         for i, card in enumerate(self.playerList[0].getHand().getCards()):
-            if card_options.contains(card):       
+            if card_options.contains(card) and choose:     
                 self.show_card(self.hand_frame, card.getValue(), card.getSuit(), i, True)
             else:
                 self.show_card(self.hand_frame, card.getValue(), card.getSuit(), i, False)
+    
+    def end(self):
+        self.score_frame.destroy()
+        self.hand_frame.destroy()
+        self.bid_frame.destroy()
+        self.trump_label.destroy()
+        self.score_frame = tk.Frame(self)
+        self.score_frame.place(x = 200, y = 175, relwidth=0.4, relheight=0.4)
+        self.score_label = tk.Label(self.score_frame, text = f"Final Scores: ", font = ("Terminal", 20))
+        self.score_label.grid(row=0,column=0)
+        for i, player in enumerate(self.playerList):
+            self.player_score_label = tk.Label(self.score_frame, text = f"player {i + 1}: {player.getScore()}", font = ("Terminal", 20))
+            self.player_score_label.grid(row = i+1, column = 0)
 
 
 if __name__ == "__main__":

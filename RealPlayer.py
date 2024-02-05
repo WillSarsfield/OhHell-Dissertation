@@ -78,6 +78,7 @@ class RealPlayer:
         return options
     
     def playOption(self, choice): #picks a random card out of the options, removes it from hand, and returns it
+        self.hand.remove(choice)
         return choice
     
     def playBid(self, bid): #picks a random number from 0 to 13
