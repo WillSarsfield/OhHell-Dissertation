@@ -10,9 +10,10 @@ import sys, os
 #Game class that when called plays the number of rounds specified
 
 class Game:
-    def __init__(self, rounds, players, playersStrength, handSize = None, verbose=True, optimisations = [], best_weights=[]) -> None:
+    def __init__(self, rounds, players, playersStrength, handSize = None, verbose=True, optimisations = [], best_weights=[], dynamic_hand = False) -> None:
         self.players = players #number of players
         self.playerList = []
+        hand_change = -1
         if handSize:
             self.handSize = handSize
         else:
@@ -38,6 +39,14 @@ class Game:
             for player in self.playerList:
                 print(f"{player.getName()}, score this round: {player.getRoundScore()}, overall score: {player.getScore()}")
                 player.addRoundScore(-player.getRoundScore())
+            if dynamic_hand:
+                self.handSize += hand_change
+                if self.handSize == 0:
+                    hand_change = 1
+                    self.handSize = 2
+                if self.handSize > 13:
+                    hand_change = -1
+                    self.handSize = 12
     
     def getPlayers(self):#return player scores for statistics overview
         return self.playerList
@@ -81,7 +90,7 @@ class Game:
         bidTotal = 0
         bids = []
         for i in range(first , first + len(self.playerList)):
-            self.playerList[i % len(self.playerList)].resetCardsInDeck(deck.cardList)
+            self.playerList[i % len(self.playerList)].resetCardsInDeck()
             if i != first + len(self.playerList) - 1:
                 if i == first:
                     self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize, trump, True, len(self.playerList), bids) #can make bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)

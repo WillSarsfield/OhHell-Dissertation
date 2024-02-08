@@ -173,6 +173,7 @@ class GameInterface(tk.Tk):
             self.playerList.append(player)#add to list of players
         self.round_count = 1
         self.trump = 0
+        self.hand_change = -1
         # initialise labels and frames
         # round label
         self.round_label = tk.Label(self, text=f"Round: {self.round_count}/{self.rounds}", font = ("Terminal", 20))
@@ -232,7 +233,7 @@ class GameInterface(tk.Tk):
         for player in self.playerList:
             player.bid = 0
         for i in range(first , first + len(self.playerList)):
-            self.playerList[i % len(self.playerList)].resetCardsInDeck(self.deck.cardList)
+            self.playerList[i % len(self.playerList)].resetCardsInDeck()
             if i % len(self.playerList) == 0:
                 self.save_index = i + 1
                 self.get_bid()
@@ -324,6 +325,13 @@ class GameInterface(tk.Tk):
             self.trump = self.trump % 4
             self.update_trump()
             self.round_count += 1
+            self.hand_size += self.hand_change
+            if self.hand_size == 0:
+                self.hand_change = 1
+                self.hand_size = 2
+            if self.hand_size > 13:
+                self.hand_change = -1
+                self.hand_size = 12
             if self.round_count > self.rounds:
                 self.end()
                 return

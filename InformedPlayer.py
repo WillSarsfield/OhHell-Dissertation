@@ -10,7 +10,7 @@ class InformedPlayer(Player):
         self.cardsInDeck = Deck()
         self.optimisations = optimisations
 
-    def resetCardsInDeck(self, cards):
+    def resetCardsInDeck(self, cards = []):
         self.cardsInDeck = Deck()
         for card in cards:
             self.cardsInDeck.removeCard(card)

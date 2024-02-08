@@ -51,7 +51,7 @@ class RealPlayer:
     def updateCardsInDeck(self, cards):
         pass
 
-    def resetCardsInDeck(self, cards):
+    def resetCardsInDeck(self, cards=[]):
         pass
 
     def addHandHistory(self, cards):
