@@ -81,8 +81,7 @@ class Game:
         bidTotal = 0
         bids = []
         for i in range(first , first + len(self.playerList)):
-            if deck.cardList: #update cards not used in the round, consistent for each player
-                self.playerList[i % len(self.playerList)].resetCardsInDeck(deck.cardList)
+            self.playerList[i % len(self.playerList)].resetCardsInDeck(deck.cardList)
             if i != first + len(self.playerList) - 1:
                 if i == first:
                     self.playerList[i % len(self.playerList)].playBid(handSize + 1, handSize, trump, True, len(self.playerList), bids) #can make bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)

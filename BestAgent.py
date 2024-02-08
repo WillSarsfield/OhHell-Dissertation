@@ -30,7 +30,7 @@ class BestAgent(Player):
             choice = options[0]
             self.hand.remove(choice)
             return choice
-        time_limit = 10
+        time_limit = 5
         time_start = time.time()
         iterations = 5000
         wins = [0 for _ in options]
@@ -73,7 +73,7 @@ class BestAgent(Player):
         current_bid = 0
         self.updateCardsInDeck(self.hand.getCards())
         print(self.cardsInDeck)
-        time_limit = 10
+        time_limit = 5
         time_start = time.time()
         iterations = 5000
         wins = np.zeros(handSize)
