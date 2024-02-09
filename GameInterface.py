@@ -10,15 +10,17 @@ from Hand import Hand
 from Card import Card
 import math
 import time
+import sys, os
 
 class GameInterface(tk.Tk):
     def __init__(self):
         super().__init__()
+        sys.stdout = open(os.devnull, 'w', encoding="utf-8")
         self.players = 4
         self.hand_size = 13
         self.rounds = 4
         self.opponent_strengths = [1,1,1]
-        self.title("Declaration Whist")
+        self.title("Oh Hell!")
         self.geometry("650x650")
         self.resizable(False,False)
         self.bind("<Escape>", lambda event: self.destroy())
@@ -544,5 +546,9 @@ class GameInterface(tk.Tk):
 
 
 if __name__ == "__main__":
+    game = GameInterface()
+    game.mainloop()
+
+def main():
     game = GameInterface()
     game.mainloop()
