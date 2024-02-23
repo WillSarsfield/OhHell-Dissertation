@@ -8,9 +8,8 @@ from BestAgent import BestAgent
 from Deck import Deck
 from Hand import Hand
 from Card import Card
-import math
-import time
 import sys, os
+import csv
 
 class GameInterface(tk.Tk):
     def __init__(self):
@@ -18,7 +17,8 @@ class GameInterface(tk.Tk):
         sys.stdout = open(os.devnull, 'w', encoding="utf-8")
         self.players = 4
         self.hand_size = 13
-        self.rounds = 4
+        self.original_hand_size = 13
+        self.rounds = 13
         self.opponent_strengths = [1,1,1]
         self.title("Oh Hell!")
         self.geometry("650x650")
@@ -79,7 +79,7 @@ class GameInterface(tk.Tk):
         # option menu for number of rounds
         self.rounds_options = ["26", "13", "6", "5", "4", "3", "2", "1"]
         self.selected_option_rounds = tk.StringVar(self)
-        self.selected_option_rounds.set(self.rounds_options[2])
+        self.selected_option_rounds.set(self.rounds_options[1])
         self.rounds_menu_button = tk.Menubutton(self.options_frame, text=f"{self.rounds}", font = ("Terminal", 12), relief="raised")
         self.rounds_menu_button.grid(row = 2, column = 1)
         self.rounds_options_menu = tk.Menu(self.rounds_menu_button, tearoff=False)
@@ -120,6 +120,7 @@ class GameInterface(tk.Tk):
     
     def on_hand_size_select(self, value):
         self.hand_size = int(value)
+        self.original_hand_size = int(value)
         self.hand_size_menu_button.destroy()
         self.hand_size_menu_button = tk.Menubutton(self.options_frame, text=f"{self.hand_size}", font = ("Terminal", 12), relief="raised")
         self.hand_size_menu_button.grid(row = 1, column = 1)
@@ -236,12 +237,13 @@ class GameInterface(tk.Tk):
             player.bid = 0
         self.player_bidding_label = tk.Label(self, text = f"{self.playerList[self.save_first].getName()} is bidding", font = ("Terminal", 12))
         self.player_bidding_label.place(x = 20, y = 80)
+        for player in self.playerList:
+            player.resetCardsInDeck()
         for i in range(first , first + len(self.playerList)):
             self.player_bidding_label.destroy()
             self.player_bidding_label = tk.Label(self, text = f"{self.playerList[i % len(self.playerList)].getName()} is bidding", font = ("Terminal", 12))
             self.player_bidding_label.place(x = 20, y = 80)
             self.update()
-            self.playerList[i % len(self.playerList)].resetCardsInDeck()
             if i % len(self.playerList) == 0:
                 self.save_index = i + 1
                 self.get_bid()
@@ -543,6 +545,18 @@ class GameInterface(tk.Tk):
         for i, player in enumerate(self.playerList):
             self.player_score_label = tk.Label(self.score_frame, text = f"player {i + 1}: {player.getScore()}", font = ("Terminal", 20))
             self.player_score_label.grid(row = i+1, column = 0)
+        filename = "scores.csv"
+        output = []
+        output.append(self.players)
+        output.append(self.original_hand_size)
+        output.append(self.rounds)
+        output.append(self.opponent_strengths[0])
+        scores = ([player.getScore() for player in self.playerList])
+        for score in scores:
+            output.append(score)
+        with open(filename, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(output)
 
 
 if __name__ == "__main__":

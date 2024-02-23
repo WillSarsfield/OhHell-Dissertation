@@ -1,0 +1,2 @@
+[console_scripts]
+oh_hell = comp30040_declaration_whist.GameInterface:main

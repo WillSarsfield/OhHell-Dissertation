@@ -17,11 +17,12 @@ def run():
     playerStrengths1 = [2,1,1,1]
     playerStrengths2 = [0,0,0,0]
     verbose = False
-    samples = 50
+    samples = 20
+    dynamic_hand = True
     startTime = time.time()
     optimisations =  [0.285903516922823, 0.1343298885883228, 0.2513171910666505, 0.2654805206104466, 0.06296888281175703, 0.19781578320406684, 0.40322548219933846, 0.1057952046865951, 0.29316352990999955, 0.24951563665051385, 0.25987660163497556, 0.23694603672039563, 0.25366172499411493]
     for i in range(0, samples):
-        game = Game(rounds, players, playerStrengths1, handSize, verbose, optimisations)
+        game = Game(rounds, players, playerStrengths1, handSize, verbose, optimisations, dynamic_hand)
         bestPlayerScores.append(game.getPlayers()[0].getScore())
         informedPlayer1Scores.append(game.getPlayers()[1].getScore())
         informedPlayer2Scores.append(game.getPlayers()[2].getScore())
@@ -63,7 +64,7 @@ def run():
     # Adding labels and title
     plt.xlabel('Sample')
     plt.ylabel('Player Score')
-    plt.title(f'Performance Trends of Best Agent and Informed Players in a {handSize} card game')
+    plt.title(f'Performance Trends of Best Agent and Informed Players in a decreasing hand size card game')
     plt.legend()  # Show legend
 
     # Display the plot

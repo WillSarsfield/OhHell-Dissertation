@@ -1,0 +1,6 @@
+setup.py
+Oh_Hell.egg-info/PKG-INFO
+Oh_Hell.egg-info/SOURCES.txt
+Oh_Hell.egg-info/dependency_links.txt
+Oh_Hell.egg-info/entry_points.txt
+Oh_Hell.egg-info/top_level.txt
