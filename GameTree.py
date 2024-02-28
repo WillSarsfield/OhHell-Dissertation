@@ -48,13 +48,15 @@ class GameTree:
         if self.cards_played:
             indent = len(self.cards_played)
         # select random distribution of unseen cards for other players to have
-        for _ in range(self.players - 1):
+        for i in range(self.players):
+            if i == self.i:
+                continue
             if indent > 0:
                 random_hand = random.sample(unseen.getCards(), k=len(self.hands[self.i]) - 1)
             else:
                 random_hand = random.sample(unseen.getCards(), k=len(self.hands[self.i]))
             indent -= 1
-            self.hands.append(random_hand)
+            self.hands[i] = random_hand
             # remove selected cards from unseen
             for card in random_hand:
                 unseen.removeCard(card)
@@ -151,14 +153,49 @@ class GameTree:
     def simulate_random_playout(self, hands, scores, player, cards_played):
         """Simulation of random moves from the current cards"""
         while True: # until there are no more random moves to make, keep making random moves
-            if not cards_played: # get player choices
-                choices = hands[player]
+            if len(cards_played) == self.players or not cards_played: # get player choices
+                choices = copy.deepcopy(hands[player])
             else:
                 choices = self.get_choices(hands[player], cards_played[0])
             if not choices: # if no choices left then round is over
                 return self.evaluate(scores) # return the evaluation of the final state
             if type(choices) is not list:
                 choices = [choices]
+            print("----")
+            print(f"player: {player + 1}")
+            print("hand: ", end = "")
+            for c in hands[player]:
+                print(c, end = " ")
+            print()
+            print(f"scores: {scores}")
+            print(f"bids: {self.bids}")
+            print("cards played: ", end="")
+            for c in cards_played:
+                print(c, end = " ")
+            print()
+            if self.bids:
+                if self.bids[player] == scores[player] and len(cards_played) != self.players and len(choices) != 1: # Optimisation: if player can avoid winning a trick to stay on bid then do so
+                    for c in choices:
+                        wins = True
+                        for card in cards_played:
+                            if not c.beats(card, cards_played[0].getSuit(), self.trump):
+                                wins = False
+                                break
+                        if wins == True: # remove choices that could cause a win when bid is met
+                            print(f"{c} makes player bust")
+                            choices.remove(c)
+                if len(choices) == 0:
+                    print("player must bust")
+                    if len(cards_played) == self.players or not cards_played: # get player choices
+                        choices = hands[player]
+                    else:
+                        choices = self.get_choices(hands[player], cards_played[0])
+                    if type(choices) is not list:
+                        choices = [choices]
+            for c in choices:
+                print(c, end= "")
+            print()
+            print("----")
             choice = random.choice(choices) # pick random choice
             # print(f"player {player + 1}: {choice}")
             hands[player] = [card for card in hands[player] if not card.equalTo(choice)] # remove choice from players hand

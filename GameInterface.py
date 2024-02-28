@@ -246,30 +246,36 @@ class GameInterface(tk.Tk):
             self.update()
             if i % len(self.playerList) == 0:
                 self.save_index = i + 1
-                self.get_bid()
-                
-                break
-            if (i % len(self.playerList)) != len(self.playerList) - 1:
-                if i == first:
-                    self.playerList[i % len(self.playerList)].playBid(self.hand_size + 1, self.hand_size, self.trump, True, len(self.playerList), self.bids) #can make bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
+                if i == (first + len(self.playerList) - 1):
+                    self.get_bid(True)
                 else:
-                    self.playerList[i % len(self.playerList)].playBid(self.hand_size + 1, self.hand_size, self.trump, False, len(self.playerList), self.bids)
+                    self.get_bid()
+
+                break
+            if i == (first + len(self.playerList) - 1):
+                if i == first:
+                    self.playerList[i % len(self.playerList)].playBid(self.hand_size + 1, self.hand_size, self.trump, True, len(self.playerList), self.bids, i % len(self.playerList)) #can make bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
+                else:
+                    self.playerList[i % len(self.playerList)].playBid(self.hand_size + 1, self.hand_size, self.trump, False, len(self.playerList), self.bids, i % len(self.playerList))
                 self.bidTotal += self.playerList[i % len(self.playerList)].getBid()
                 print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
                 self.bids.append(self.playerList[i % len(self.playerList)].getBid())
             else:
                 if self.bidTotal < self.hand_size + 1: #calculates the bid that is banned for the final player
-                    self.playerList[i % len(self.playerList)].playBid(self.hand_size - self.bidTotal, self.hand_size, self.trump, False, len(self.playerList), self.bids)
+                    self.playerList[i % len(self.playerList)].playBid(self.hand_size - self.bidTotal, self.hand_size, self.trump, False, len(self.playerList), self.bids, i % len(self.playerList))
                 else:
-                    self.playerList[i % len(self.playerList)].playBid(self.hand_size + 1, self.hand_size, self.trump, False, len(self.playerList), self.bids)
+                    self.playerList[i % len(self.playerList)].playBid(self.hand_size + 1, self.hand_size, self.trump, False, len(self.playerList), self.bids, i % len(self.playerList))
                 print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
                 self.bids.append(self.playerList[i % len(self.playerList)].getBid())
             self.update_bid_board()
             self.update()
 
-    def get_bid(self):
+    def get_bid(self, restricted = False):
         self.bid_options = []
+        ban = self.hand_size - self.bidTotal
         for i in range(self.hand_size + 1):
+            if restricted and i == ban:
+                continue
             self.bid_options.append(i)
         self.selected_option_bid = tk.StringVar(self)
         self.selected_option_bid.set(self.bid_options[0])
@@ -312,17 +318,17 @@ class GameInterface(tk.Tk):
                     break
                 if (i % len(self.playerList)) != len(self.playerList) - 1:
                     if i == self.save_first:
-                        self.playerList[i % len(self.playerList)].playBid(self.hand_size + 1, self.hand_size, self.trump, True, len(self.playerList), self.bids) #can make bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
+                        self.playerList[i % len(self.playerList)].playBid(self.hand_size + 1, self.hand_size, self.trump, True, len(self.playerList), self.bids, i % len(self.playerList)) #can make bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
                     else:
-                        self.playerList[i % len(self.playerList)].playBid(self.hand_size + 1, self.hand_size, self.trump, False, len(self.playerList), self.bids)
+                        self.playerList[i % len(self.playerList)].playBid(self.hand_size + 1, self.hand_size, self.trump, False, len(self.playerList), self.bids, i % len(self.playerList))
                     self.bidTotal += self.playerList[i % len(self.playerList)].getBid()
                     print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
                     self.bids.append(self.playerList[i % len(self.playerList)].getBid())
                 else:
                     if self.bidTotal < self.hand_size + 1: #calculates the bid that is banned for the final player
-                        self.playerList[i % len(self.playerList)].playBid(self.hand_size - self.bidTotal, self.hand_size, self.trump, False, len(self.playerList), self.bids)
+                        self.playerList[i % len(self.playerList)].playBid(self.hand_size - self.bidTotal, self.hand_size, self.trump, False, len(self.playerList), self.bids, i % len(self.playerList))
                     else:
-                        self.playerList[i % len(self.playerList)].playBid(self.hand_size + 1, self.hand_size, self.trump, False, len(self.playerList), self.bids)
+                        self.playerList[i % len(self.playerList)].playBid(self.hand_size + 1, self.hand_size, self.trump, False, len(self.playerList), self.bids, i % len(self.playerList))
                     print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
                     self.bids.append(self.playerList[i % len(self.playerList)].getBid())
                 self.update_bid_board()
@@ -377,7 +383,7 @@ class GameInterface(tk.Tk):
             print("first = " + str(self.save_first + 1))
             options = self.playerList[self.save_first].getOptions() #lead player collects all the possible plays it can make
             print("player " + str(self.save_first + 1) + "'s turn:")
-            self.leadCard = self.playerList[self.save_first].playOption(options, self.cardList, self.trump, len(self.playerList), self.bids, self.scores) #lead player chooses a play from its options
+            self.leadCard = self.playerList[self.save_first].playOption(options, self.cardList, self.trump, len(self.playerList), self.bids, self.scores, self.save_first) #lead player chooses a play from its options
             print(self.leadCard)
             self.cardList.append(self.leadCard) #lead card is added to the trick
             self.update_table()
@@ -394,7 +400,7 @@ class GameInterface(tk.Tk):
                     return
                 options = self.playerList[i % len(self.playerList)].getOptions(self.leadCard.getSuit()) #player collects all the possible plays it can make
                 print("player " + str((i % len(self.playerList)) + 1) + "'s turn:")
-                card = self.playerList[i % len(self.playerList)].playOption(options, self.cardList, self.trump, len(self.playerList), self.bids, self.scores) #player chooses a play from its options
+                card = self.playerList[i % len(self.playerList)].playOption(options, self.cardList, self.trump, len(self.playerList), self.bids, self.scores, i % len(self.playerList)) #player chooses a play from its options
                 print(card)
                 self.cardList.append(card) #card played added to list
                 self.update_table()
@@ -435,7 +441,7 @@ class GameInterface(tk.Tk):
                     return
                 options = self.playerList[i % len(self.playerList)].getOptions(self.leadCard.getSuit()) #player collects all the possible plays it can make
                 print("player " + str((i % len(self.playerList)) + 1) + "'s turn:")
-                card = self.playerList[i % len(self.playerList)].playOption(options, self.cardList, self.trump, len(self.playerList), self.bids, self.scores) #player chooses a play from its options
+                card = self.playerList[i % len(self.playerList)].playOption(options, self.cardList, self.trump, len(self.playerList), self.bids, self.scores, i % len(self.playerList)) #player chooses a play from its options
                 print(card)
                 self.cardList.append(card) #card played added to list
                 self.update_table()

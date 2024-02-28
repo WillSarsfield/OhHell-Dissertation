@@ -21,7 +21,7 @@ class InformedPlayer(Player):
         for card in cards:
             self.cardsInDeck.removeCard(card)
 
-    def playOption(self, options, cardsPlayed, trump, players, bids, scores):
+    def playOption(self, options, cardsPlayed, trump, players, bids, scores, current_player):
         self.updateCardsInDeck(cardsPlayed)
         #print(f"cards left: {self.cardsInDeck}")
         if len(options) == 1:
@@ -168,7 +168,7 @@ class InformedPlayer(Player):
         winningOptions = self.getWinningOptions(options, cardsPlayed, trump)
         return [option for option in options if option not in winningOptions]
 
-    def playBid(self, ban, handSize, trump, lead, players, bids):
+    def playBid(self, ban, handSize, trump, lead, players, bids, current_player):
         self.updateCardsInDeck(self.hand.getCards())
         bid = ban
         while bid == ban:

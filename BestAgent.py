@@ -24,7 +24,7 @@ class BestAgent(Player):
         for card in cards:
             self.cardsInDeck.removeCard(card)
 
-    def playOption(self, options, cardsPlayed, trump, players, bids, scores):
+    def playOption(self, options, cardsPlayed, trump, players, bids, scores, current_player):
         self.updateCardsInDeck(cardsPlayed)
         if len(options) == 1:
             choice = options[0]
@@ -40,7 +40,13 @@ class BestAgent(Player):
             winner_index = 0
             samples += 1
             # make game tree
-            game_tree = GameTree(parent = None, hands = [self.hand.getCards()], cards_played=cardsPlayed, players = players, bids = bids, scores = scores, trump=trump, max_depth=12)
+            hands = []
+            for i in range(players):
+                if i == current_player:
+                    hands.append(self.hand.getCards())
+                else:
+                    hands.append([])
+            game_tree = GameTree(parent = None, hands = hands, cards_played=cardsPlayed, players = players, bids = bids, scores = scores, trump=trump, current_player=current_player, max_depth=12)
             game_tree.determinize(self.cardsInDeck)
             for _ in range(iterations):
                 selection = game_tree.select_child()
@@ -69,7 +75,7 @@ class BestAgent(Player):
         self.hand.remove(choice)
         return choice
 
-    def playBid(self, ban, handSize, trump, lead, players, bids):
+    def playBid(self, ban, handSize, trump, lead, players, bids, current_player):
         current_bid = 0
         self.updateCardsInDeck(self.hand.getCards())
         print(self.cardsInDeck)
@@ -83,7 +89,13 @@ class BestAgent(Player):
         while time.time() - time_start < time_limit:
             samples += 1
             # make game tree
-            game_tree = GameTree(parent = None, hands = [self.hand.getCards()], scores=scores, players = players, trump=trump, max_depth=12)
+            hands = []
+            for i in range(players):
+                if i == current_player:
+                    hands.append(self.hand.getCards())
+                else:
+                    hands.append([])
+            game_tree = GameTree(parent = None, hands = hands, scores=scores, players = players, trump=trump, current_player = current_player, max_depth=12)
             game_tree.determinize(self.cardsInDeck)
             for j in range(iterations):
                 selection = game_tree.select_child()
