@@ -14,7 +14,7 @@ import csv
 class GameInterface(tk.Tk):
     def __init__(self):
         super().__init__()
-        sys.stdout = open(os.devnull, 'w', encoding="utf-8")
+        #sys.stdout = open(os.devnull, 'w', encoding="utf-8")
         self.players = 4
         self.hand_size = 13
         self.original_hand_size = 13
@@ -252,7 +252,7 @@ class GameInterface(tk.Tk):
                     self.get_bid()
 
                 break
-            if i == (first + len(self.playerList) - 1):
+            if i != (first + len(self.playerList) - 1):
                 if i == first:
                     self.playerList[i % len(self.playerList)].playBid(self.hand_size + 1, self.hand_size, self.trump, True, len(self.playerList), self.bids, i % len(self.playerList)) #can make bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
                 else:
@@ -261,6 +261,7 @@ class GameInterface(tk.Tk):
                 print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
                 self.bids.append(self.playerList[i % len(self.playerList)].getBid())
             else:
+                print(f"player {i % len(self.playerList) + 1} cannot bid {self.hand_size - self.bidTotal}")
                 if self.bidTotal < self.hand_size + 1: #calculates the bid that is banned for the final player
                     self.playerList[i % len(self.playerList)].playBid(self.hand_size - self.bidTotal, self.hand_size, self.trump, False, len(self.playerList), self.bids, i % len(self.playerList))
                 else:
@@ -275,6 +276,7 @@ class GameInterface(tk.Tk):
         ban = self.hand_size - self.bidTotal
         for i in range(self.hand_size + 1):
             if restricted and i == ban:
+                print(f"player 1 cannot bid {ban}")
                 continue
             self.bid_options.append(i)
         self.selected_option_bid = tk.StringVar(self)
@@ -316,7 +318,7 @@ class GameInterface(tk.Tk):
                     self.save_index = i + 1
                     self.get_bid()
                     break
-                if (i % len(self.playerList)) != len(self.playerList) - 1:
+                if i != self.save_first + len(self.playerList) - 1:
                     if i == self.save_first:
                         self.playerList[i % len(self.playerList)].playBid(self.hand_size + 1, self.hand_size, self.trump, True, len(self.playerList), self.bids, i % len(self.playerList)) #can make bid, argument passed represents a bid that is banned (14 passed as it is an unbiddable number)
                     else:
@@ -325,6 +327,7 @@ class GameInterface(tk.Tk):
                     print("player " + str((i % len(self.playerList))+1) + " bid: " + str(self.playerList[i % len(self.playerList)].getBid()))
                     self.bids.append(self.playerList[i % len(self.playerList)].getBid())
                 else:
+                    print(f"player {i % len(self.playerList) + 1} cannot bid {self.hand_size - self.bidTotal}")
                     if self.bidTotal < self.hand_size + 1: #calculates the bid that is banned for the final player
                         self.playerList[i % len(self.playerList)].playBid(self.hand_size - self.bidTotal, self.hand_size, self.trump, False, len(self.playerList), self.bids, i % len(self.playerList))
                     else:

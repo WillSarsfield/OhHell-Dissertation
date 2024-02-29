@@ -161,18 +161,6 @@ class GameTree:
                 return self.evaluate(scores) # return the evaluation of the final state
             if type(choices) is not list:
                 choices = [choices]
-            print("----")
-            print(f"player: {player + 1}")
-            print("hand: ", end = "")
-            for c in hands[player]:
-                print(c, end = " ")
-            print()
-            print(f"scores: {scores}")
-            print(f"bids: {self.bids}")
-            print("cards played: ", end="")
-            for c in cards_played:
-                print(c, end = " ")
-            print()
             if self.bids:
                 if self.bids[player] == scores[player] and len(cards_played) != self.players and len(choices) != 1: # Optimisation: if player can avoid winning a trick to stay on bid then do so
                     for c in choices:
@@ -182,20 +170,14 @@ class GameTree:
                                 wins = False
                                 break
                         if wins == True: # remove choices that could cause a win when bid is met
-                            print(f"{c} makes player bust")
                             choices.remove(c)
                 if len(choices) == 0:
-                    print("player must bust")
                     if len(cards_played) == self.players or not cards_played: # get player choices
                         choices = hands[player]
                     else:
                         choices = self.get_choices(hands[player], cards_played[0])
                     if type(choices) is not list:
                         choices = [choices]
-            for c in choices:
-                print(c, end= "")
-            print()
-            print("----")
             choice = random.choice(choices) # pick random choice
             # print(f"player {player + 1}: {choice}")
             hands[player] = [card for card in hands[player] if not card.equalTo(choice)] # remove choice from players hand
