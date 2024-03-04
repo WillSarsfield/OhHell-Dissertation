@@ -305,6 +305,7 @@ class GameInterface(tk.Tk):
     def submit_bid(self):
         print(f"player 1 bid: {self.playerList[0].getBid()}")
         self.bids.append(self.playerList[0].getBid())
+        self.bidTotal += self.playerList[0].getBid()
         self.table_frame.destroy()
         self.table_frame = tk.Frame(self, bd= 2, relief=tk.SUNKEN)
         self.table_frame.place(x = 200, y = 175, relwidth=0.4, relheight=0.4)

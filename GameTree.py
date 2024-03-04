@@ -200,13 +200,13 @@ class GameTree:
                             break
                     if player_wins:
                         # All comparisons passed, player i wins
-                        player = (player + i) % 4
+                        player = (player + i) % self.players
                         scores[player] += 1
                         break
 
     def evaluate(self, scores):
         if self.bids: # if not in the bidding phase
-            for i in range(4): # if player i made their bid award bonus points
+            for i in range(self.players): # if player i made their bid award bonus points
                 if self.bids[i] == scores[i]:
                     scores[self.i] += 10
         return scores
