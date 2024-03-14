@@ -14,7 +14,7 @@ import csv
 class GameInterface(tk.Tk):
     def __init__(self):
         super().__init__()
-        #sys.stdout = open(os.devnull, 'w', encoding="utf-8")
+        sys.stdout = open(os.devnull, 'w', encoding="utf-8")
         self.players = 4
         self.hand_size = 13
         self.original_hand_size = 13
