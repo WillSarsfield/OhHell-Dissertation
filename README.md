@@ -1,0 +1,9 @@
+This project was created for my dissertation and was worked on between 9/23 - 5/24. The project title was Game Playing: Board or Card Games. I chose the card game "Oh Hell!" and decided to use an artificial intelligence-based approach to produce agents that could play against real players with a noticeable level of skill.
+
+Here is a link to the video submission which gives a 9-minute overview of the project:
+https://youtu.be/WniUjhG6ZdQ?si=4ytGGSM2eD_qq7qR
+
+Here is the abstract to my 13,000-word report:
+British "Oh Hell!" is a simpler variation of the trick-taking game Bid Whist, which is quick to learn but difficult to master, containing both elements of chance and strategy. In this report, I aim to design, implement and test software for human players to play "Oh Hell!" and propose different methods for making artificial intelligence opponents that play the game to a high level. The project is made up of 3 main phases, firstly designing and implementing the game and building an agent that plays legal random moves, then taking a heuristic approach based on human-inspired strategies to make an informed agent, and finally, creating a Monte Carlo agent that attempts to search through states of the game and produce the best move given its knowledge.
+
+The paper ()precisely describes the process taken to create each agent and the challenges that were overcome during the decision-making associated with design and implementation. Once the agents are finished they are evaluated against the other agents as well as real players who took part in my user evaluation. The data gathered suggests that the knowledge-based heuristic approach has a characteristic strategy which is recognisable by real players, whilst the Monte Carlo agent is proven to be the best agent against real players. The level of expertise of the agent is deemed uncertain due to a small, biased sample of ``Oh Hell!" players that participated in the user evaluation.
